@@ -1435,44 +1435,19 @@ function renderFixedExpenses() {
 
 function showExpensesPage() {
 
-  const items =
-  transactions
-    .map(normalizeTransaction)
-    .filter(item =>
-      isInPeriod(
-        item.date,
-        currentPeriod
-      )
-    );
-
-const expenseTotal =
-  items
-    .filter(
-      item =>
-        getType(item.type) ===
-          "expense"
-    )
-    .reduce(
-      (total, item) =>
-        total + item.value,
-      0
-    );
+const dashboardExpense =
+  document.getElementById(
+    "expense"
+  );
 
 setText(
   "expensesTotal",
-  "− " + money.format(
-    expenseTotal
-  )
+  dashboardExpense
+    ?.textContent
+    ?.trim() ||
+    "− R$ 0,00"
 );
-  expensesPage?.classList.add(
-    "open"
-  );
-
-  document.body.classList.add(
-    "modal-open"
-  );
 }
-
 
 function hideExpensesPage() {
 
