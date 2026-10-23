@@ -3,7 +3,20 @@ const API_URL =
 
 let transactions = [];
 let fixedExpenses = [];
+const expensesPage =
+  document.getElementById(
+    "expensesPage"
+  );
 
+const openExpenses =
+  document.getElementById(
+    "openExpenses"
+  );
+
+const closeExpenses =
+  document.getElementById(
+    "closeExpenses"
+  );
 let currentPeriod = "month";
 let selectedDate = new Date();
 
@@ -1418,7 +1431,44 @@ function renderFixedExpenses() {
     });
 }
 
+/* ========================================
+   TELA DE GASTOS
+======================================== */
 
+function showExpensesPage() {
+
+  expensesPage?.classList.add(
+    "open"
+  );
+
+  document.body.classList.add(
+    "modal-open"
+  );
+}
+
+
+function hideExpensesPage() {
+
+  expensesPage?.classList.remove(
+    "open"
+  );
+
+  document.body.classList.remove(
+    "modal-open"
+  );
+}
+
+
+openExpenses?.addEventListener(
+  "click",
+  showExpensesPage
+);
+
+
+closeExpenses?.addEventListener(
+  "click",
+  hideExpensesPage
+);
 /* ABRIR TELA */
 
 function showFixedExpenses() {
