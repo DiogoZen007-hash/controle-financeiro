@@ -901,7 +901,117 @@ header{
 
   letter-spacing:-.4px;
 }
+/* CALENDÁRIO DE DIAS */
 
+.calendar-weekdays{
+  display:grid;
+
+  grid-template-columns:
+    repeat(7,1fr);
+
+  gap:4px;
+
+  margin:
+    22px 0 8px;
+
+  text-align:center;
+}
+
+.calendar-weekdays span{
+  color:#70787e;
+
+  font-size:11px;
+
+  font-weight:800;
+
+  text-transform:uppercase;
+}
+
+.calendar-days{
+  display:grid;
+
+  grid-template-columns:
+    repeat(7,1fr);
+
+  gap:5px;
+
+  margin-bottom:16px;
+}
+
+.calendar-day{
+  aspect-ratio:1;
+
+  border:0;
+
+  border-radius:13px;
+
+  background:transparent;
+
+  color:#e8eaec;
+
+  font-family:inherit;
+
+  font-size:14px;
+
+  font-weight:700;
+
+  display:grid;
+
+  place-items:center;
+
+  cursor:pointer;
+
+  position:relative;
+}
+
+.calendar-day:hover{
+  background:#171d21;
+}
+
+.calendar-day:active{
+  transform:scale(.92);
+}
+
+.calendar-day.empty{
+  pointer-events:none;
+}
+
+.calendar-day.today{
+  border:
+    1px solid #4b555d;
+}
+
+.calendar-day.selected{
+  background:#fff;
+
+  color:#080b0e;
+
+  box-shadow:
+    0 4px 18px #ffffff20;
+}
+
+.calendar-day.has-transactions:after{
+  content:"";
+
+  position:absolute;
+
+  bottom:4px;
+
+  width:4px;
+  height:4px;
+
+  border-radius:50%;
+
+  background:#7d858b;
+}
+
+.calendar-day.selected:after{
+  background:#080b0e;
+}
+
+#showWholeMonth{
+  margin-bottom:9px;
+}
 .current-month-button{
   width:100%;
 
@@ -1350,9 +1460,9 @@ header{
 <button
   class="calendar"
   id="openCalendar"
-  aria-label="Escolher mês"
+  aria-label="Abrir calendário"
 >
-  ▣
+  📅
 </button>
 
 </header>
@@ -1525,7 +1635,36 @@ Conectando ao Google Sheets…
       </button>
 
     </div>
+<!-- DIAS DA SEMANA -->
 
+<div class="calendar-weekdays">
+
+  <span>Seg</span>
+  <span>Ter</span>
+  <span>Qua</span>
+  <span>Qui</span>
+  <span>Sex</span>
+  <span>Sáb</span>
+  <span>Dom</span>
+
+</div>
+
+
+<!-- DIAS DO MÊS -->
+
+<div
+  class="calendar-days"
+  id="calendarDays"
+>
+</div>
+
+
+<button
+  class="current-month-button"
+  id="showWholeMonth"
+>
+  Ver mês inteiro
+</button>
     <button
       class="current-month-button"
       id="currentMonthButton"
