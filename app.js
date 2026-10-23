@@ -1699,6 +1699,326 @@ if (chart) {
 
     setText(
       "expensesChartChange",
+      "0 gastos"
+    );
+
+  } else {
+
+    const ordered =
+      [...expenseItems]
+        .sort(
+          (a, b) =>
+            a.date - b.date
+        );
+
+    setText(
+      "expensesChartChange",
+      ordered.length === 1
+        ? "1 gasto"
+        : `${ordered.length} gastos`
+    );
+
+
+    /* =========================
+       APENAS 1 GASTO
+    ========================= */
+
+    if (ordered.length === 1) {
+
+      const item =
+        ordered[0];
+
+      chart.innerHTML = `
+        <div class="single-expense-chart">
+
+          <div class="single-expense-value">
+            ${money.format(
+              item.value
+            )}
+          </div>
+
+          <div class="single-expense-bar">
+            <div
+              class="single-expense-bar-fill"
+            ></div>
+          </div>
+
+          <div class="single-expense-date">
+            ${dateFormatter.format(
+              item.date
+            )}
+          </div>
+
+        </div>
+      `;
+
+    } else {
+
+      /* =========================
+         2 OU MAIS GASTOS
+      ========================= */
+
+      let cumulative = 0;
+
+      const points =
+        ordered.map(item => {
+
+          cumulative +=
+            item.value;
+
+          return {
+            date:
+              item.date,
+
+            value:
+              cumulative,
+
+            originalValue:
+              item.value
+          };
+        });
+
+
+      const maxValue =
+        Math.max(
+          ...points.map(
+            point =>
+              point.value
+          ),
+          1
+        );
+
+
+      const width = 600;
+      const height = 220;
+
+      const paddingX = 26;
+      const paddingTop = 22;
+      const paddingBottom = 36;
+
+      const usableWidth =
+        width -
+        paddingX * 2;
+
+      const usableHeight =
+        height -
+        paddingTop -
+        paddingBottom;
+
+
+      const svgPoints =
+        points.map(
+          (point, index) => {
+
+            const x =
+              paddingX +
+              (
+                index /
+                (
+                  points.length -
+                  1
+                )
+              ) *
+              usableWidth;
+
+            const y =
+              paddingTop +
+              (
+                1 -
+                point.value /
+                maxValue
+              ) *
+              usableHeight;
+
+            return {
+              ...point,
+              x,
+              y
+            };
+          }
+        );
+
+
+      const linePoints =
+        svgPoints
+          .map(
+            point =>
+              `${point.x},${point.y}`
+          )
+          .join(" ");
+
+
+      const areaPoints =
+        [
+          `${svgPoints[0].x},${height - paddingBottom}`,
+
+          ...svgPoints.map(
+            point =>
+              `${point.x},${point.y}`
+          ),
+
+          `${svgPoints[
+            svgPoints.length - 1
+          ].x},${height - paddingBottom}`
+        ]
+          .join(" ");
+
+
+      chart.innerHTML = `
+        <svg
+          viewBox="0 0 ${width} ${height}"
+          width="100%"
+          height="100%"
+          preserveAspectRatio="none"
+        >
+
+          <defs>
+
+            <linearGradient
+              id="expenseAreaGradient"
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+            >
+
+              <stop
+                offset="0%"
+                stop-color="#ff4f59"
+                stop-opacity=".38"
+              />
+
+              <stop
+                offset="100%"
+                stop-color="#ff4f59"
+                stop-opacity="0"
+              />
+
+            </linearGradient>
+
+          </defs>
+
+
+          <polygon
+            points="${areaPoints}"
+            fill="url(#expenseAreaGradient)"
+          />
+
+
+          <polyline
+            points="${linePoints}"
+            fill="none"
+            stroke="#ff4f59"
+            stroke-width="5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+
+
+          ${svgPoints
+            .map(
+              point => `
+                <circle
+                  class="expense-chart-point"
+                  cx="${point.x}"
+                  cy="${point.y}"
+                  r="7"
+                  fill="#ff4f59"
+                  data-value="${money.format(
+                    point.originalValue
+                  )}"
+                  data-date="${dateFormatter.format(
+                    point.date
+                  )}"
+                />
+              `
+            )
+            .join("")}
+
+
+          ${svgPoints
+            .map(
+              point => `
+                <text
+                  x="${point.x}"
+                  y="${height - 12}"
+                  fill="#70787e"
+                  font-size="16"
+                  text-anchor="middle"
+                >
+                  ${dateFormatter.format(
+                    point.date
+                  )}
+                </text>
+              `
+            )
+            .join("")}
+
+        </svg>
+
+        <div
+          class="expense-chart-tooltip"
+          id="expenseChartTooltip"
+        ></div>
+      `;
+
+
+      const tooltip =
+        document.getElementById(
+          "expenseChartTooltip"
+        );
+
+
+      chart
+        .querySelectorAll(
+          ".expense-chart-point"
+        )
+        .forEach(point => {
+
+          point.addEventListener(
+            "click",
+            () => {
+
+              if (!tooltip) {
+                return;
+              }
+
+              tooltip.textContent =
+                `${point.dataset.date} • ${point.dataset.value}`;
+
+              tooltip.classList.add(
+                "show"
+              );
+
+              setTimeout(
+                () => {
+
+                  tooltip.classList.remove(
+                    "show"
+                  );
+
+                },
+                1800
+              );
+            }
+          );
+        });
+    }
+  }
+}
+
+if (chart) {
+
+  if (!expenseItems.length) {
+
+    chart.innerHTML = `
+      <div class="expenses-chart-placeholder">
+        Sem dados suficientes
+      </div>
+    `;
+
+    setText(
+      "expensesChartChange",
       "0%"
     );
 
