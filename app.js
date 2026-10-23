@@ -3,7 +3,7 @@ const API_URL =
 
 let transactions = [];
 let currentPeriod = "month";
-
+let selectedDate = new Date();
 let manualType = "Gasto";
 let manualCategory = "Alimentação";
 
@@ -245,34 +245,33 @@ function getType(type) {
 
 function isInPeriod(date, period) {
 
-  const now = new Date();
-
   if (period === "month") {
 
     return (
       date.getMonth() ===
-        now.getMonth() &&
+        selectedDate.getMonth() &&
       date.getFullYear() ===
-        now.getFullYear()
+        selectedDate.getFullYear()
     );
   }
 
-  const today = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  );
+  const reference =
+    new Date(selectedDate);
 
   const day =
-    today.getDay() === 0
+    reference.getDay() === 0
       ? 7
-      : today.getDay();
+      : reference.getDay();
 
   const monday =
-    new Date(today);
+    new Date(
+      reference.getFullYear(),
+      reference.getMonth(),
+      reference.getDate()
+    );
 
   monday.setDate(
-    today.getDate() - day + 1
+    monday.getDate() - day + 1
   );
 
   monday.setHours(0, 0, 0, 0);
@@ -1132,7 +1131,209 @@ function resetManualForm() {
     });
 }
 
+/* =========================
+   HISTÓRICO / CALENDÁRIO
+========================= */
 
+const monthModal =
+  document.getElementById(
+    "monthModal"
+  );
+
+const openCalendar =
+  document.getElementById(
+    "openCalendar"
+  );
+
+const closeCalendar =
+  document.getElementById(
+    "closeCalendar"
+  );
+
+const previousMonth =
+  document.getElementById(
+    "previousMonth"
+  );
+
+const nextMonth =
+  document.getElementById(
+    "nextMonth"
+  );
+
+const selectedMonth =
+  document.getElementById(
+    "selectedMonth"
+  );
+
+const currentMonthButton =
+  document.getElementById(
+    "currentMonthButton"
+  );
+
+
+const monthFormatter =
+  new Intl.DateTimeFormat(
+    "pt-BR",
+    {
+      month: "long",
+      year: "numeric"
+    }
+  );
+
+
+function updateSelectedMonth() {
+
+  if (!selectedMonth) return;
+
+  let text =
+    monthFormatter.format(
+      selectedDate
+    );
+
+  text =
+    text.charAt(0).toUpperCase() +
+    text.slice(1);
+
+  selectedMonth.textContent =
+    text;
+}
+
+
+function openMonthModal() {
+
+  if (!monthModal) return;
+
+  updateSelectedMonth();
+
+  monthModal.classList.add(
+    "open"
+  );
+
+  document.body.classList.add(
+    "modal-open"
+  );
+}
+
+
+function closeMonthModal() {
+
+  if (!monthModal) return;
+
+  monthModal.classList.remove(
+    "open"
+  );
+
+  document.body.classList.remove(
+    "modal-open"
+  );
+}
+
+
+function changeMonth(amount) {
+
+  selectedDate =
+    new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth() + amount,
+      1
+    );
+
+  currentPeriod = "month";
+
+  document
+    .querySelectorAll(
+      "[data-period]"
+    )
+    .forEach(button => {
+
+      button.classList.toggle(
+        "on",
+        button.dataset.period ===
+          "month"
+      );
+    });
+
+  updateSelectedMonth();
+
+  render();
+}
+
+
+openCalendar?.addEventListener(
+  "click",
+  openMonthModal
+);
+
+
+closeCalendar?.addEventListener(
+  "click",
+  closeMonthModal
+);
+
+
+previousMonth?.addEventListener(
+  "click",
+  () => {
+    changeMonth(-1);
+  }
+);
+
+
+nextMonth?.addEventListener(
+  "click",
+  () => {
+    changeMonth(1);
+  }
+);
+
+
+currentMonthButton?.addEventListener(
+  "click",
+  () => {
+
+    selectedDate =
+      new Date();
+
+    currentPeriod =
+      "month";
+
+    document
+      .querySelectorAll(
+        "[data-period]"
+      )
+      .forEach(button => {
+
+        button.classList.toggle(
+          "on",
+          button.dataset.period ===
+            "month"
+        );
+      });
+
+    updateSelectedMonth();
+
+    render();
+
+    closeMonthModal();
+  }
+);
+
+
+monthModal?.addEventListener(
+  "click",
+  event => {
+
+    if (
+      event.target ===
+      monthModal
+    ) {
+      closeMonthModal();
+    }
+  }
+);
+
+
+updateSelectedMonth();
 /* =========================
    SINCRONIZAÇÃO
 ========================= */
