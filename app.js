@@ -1433,25 +1433,52 @@ function renderFixedExpenses() {
    TELA DE GASTOS
 ======================================== */
 
+/* ========================================
+   TELA DE GASTOS
+======================================== */
+
 function showExpensesPage() {
 
-const dashboardExpense =
-  document.getElementById(
-    "expense"
+  const page =
+    document.getElementById(
+      "expensesPage"
+    );
+
+  const dashboardExpense =
+    document.getElementById(
+      "expense"
+    );
+
+  if (!page) {
+    return;
+  }
+
+  setText(
+    "expensesTotal",
+    dashboardExpense
+      ?.textContent
+      ?.trim() ||
+      "− R$ 0,00"
   );
 
-setText(
-  "expensesTotal",
-  dashboardExpense
-    ?.textContent
-    ?.trim() ||
-    "− R$ 0,00"
-);
+  page.classList.add(
+    "open"
+  );
+
+  document.body.classList.add(
+    "modal-open"
+  );
 }
+
 
 function hideExpensesPage() {
 
-  expensesPage?.classList.remove(
+  const page =
+    document.getElementById(
+      "expensesPage"
+    );
+
+  page?.classList.remove(
     "open"
   );
 
@@ -1461,16 +1488,24 @@ function hideExpensesPage() {
 }
 
 
-openExpenses?.addEventListener(
-  "click",
-  showExpensesPage
-);
+document
+  .getElementById(
+    "openExpenses"
+  )
+  ?.addEventListener(
+    "click",
+    showExpensesPage
+  );
 
 
-closeExpenses?.addEventListener(
-  "click",
-  hideExpensesPage
-);
+document
+  .getElementById(
+    "closeExpenses"
+  )
+  ?.addEventListener(
+    "click",
+    hideExpensesPage
+  );
 
 /* ABRIR TELA */
 
