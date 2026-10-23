@@ -1444,22 +1444,139 @@ function showExpensesPage() {
       "expensesPage"
     );
 
-  const dashboardExpense =
-    document.getElementById(
-      "expense"
-    );
-
   if (!page) {
     return;
   }
 
+
+  const items =
+    transactions
+      .map(
+        normalizeTransaction
+      )
+      .filter(item =>
+        isInPeriod(
+          item.date,
+          currentPeriod
+        )
+      );
+
+
+  const expenseTotal =
+    items
+      .filter(
+        item =>
+          getType(item.type) ===
+          "expense"
+      )
+      .reduce(
+        (total, item) =>
+          total + item.value,
+        0
+      );
+
+
+  const incomeTotal =
+    items
+      .filter(
+        item =>
+          getType(item.type) ===
+          "income"
+      )
+      .reduce(
+        (total, item) =>
+          total + item.value,
+        0
+      );
+
+
   setText(
     "expensesTotal",
-    dashboardExpense
-      ?.textContent
-      ?.trim() ||
-      "− R$ 0,00"
+    "− " + money.format(
+      expenseTotal
+    )
   );
+
+
+  setText(
+    "expensesSpentValue",
+    money.format(
+      expenseTotal
+    )
+  );
+
+
+  setText(
+    "expensesIncomeValue",
+    money.format(
+      incomeTotal
+    )
+  );
+
+
+  const status =
+    document.getElementById(
+      "expensesComparisonStatus"
+    );
+
+  const description =
+    document.getElementById(
+      "expensesComparisonDescription"
+    );
+
+
+  if (
+    expenseTotal > incomeTotal
+  ) {
+
+    if (status) {
+      status.textContent =
+        "Gastos prevalecem";
+
+      status.style.color =
+        "#ff4f59";
+    }
+
+    if (description) {
+      description.textContent =
+        "Você gastou mais do que ganhou neste período.";
+    }
+
+  } else if (
+    incomeTotal > expenseTotal
+  ) {
+
+    if (status) {
+      status.textContent =
+        "Entradas prevalecem";
+
+      status.style.color =
+        "#2ee58a";
+    }
+
+    if (description) {
+      description.textContent =
+        "Você ganhou mais do que gastou neste período.";
+    }
+
+  } else {
+
+    if (status) {
+      status.textContent =
+        "Equilibrado";
+
+      status.style.color =
+        "#ffffff";
+    }
+
+    if (description) {
+      description.textContent =
+        expenseTotal === 0
+          ? "Ainda não há entradas ou gastos registrados neste período."
+          : "Seus gastos e entradas estão equilibrados.";
+    }
+  }
+
 
   page.classList.add(
     "open"
@@ -1469,7 +1586,6 @@ function showExpensesPage() {
     "modal-open"
   );
 }
-
 
 function hideExpensesPage() {
 
