@@ -927,7 +927,366 @@ header{
 .month-navigation button:active{
   transform:scale(.97);
 }
-/* MOBILE */
+/* ========================================
+   GASTOS FIXOS
+======================================== */
+
+.fixed{
+  cursor:pointer;
+}
+
+.fixed:active{
+  transform:scale(.98);
+}
+
+.fixed-expenses-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:70;
+
+  background:#070a0d;
+
+  opacity:0;
+  pointer-events:none;
+
+  transition:opacity .2s ease;
+
+  overflow:auto;
+}
+
+.fixed-expenses-backdrop.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.fixed-expenses-page{
+  width:min(520px,100%);
+  min-height:100vh;
+
+  margin:auto;
+
+  padding:
+    calc(env(safe-area-inset-top) + 24px)
+    22px
+    calc(env(safe-area-inset-bottom) + 40px);
+}
+
+.fixed-page-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  margin-bottom:25px;
+}
+
+.fixed-page-header h2{
+  margin:0;
+
+  font-size:27px;
+  letter-spacing:-.8px;
+}
+
+.fixed-page-header small{
+  display:block;
+
+  color:#858d93;
+
+  margin-bottom:4px;
+
+  font-weight:700;
+}
+
+.fixed-close{
+  width:44px;
+  height:44px;
+
+  border:1px solid #293138;
+  border-radius:50%;
+
+  background:#151b20;
+
+  color:#fff;
+
+  font-size:24px;
+
+  cursor:pointer;
+}
+
+.fixed-total-card{
+  position:relative;
+  overflow:hidden;
+
+  border:1px solid #494324;
+
+  border-radius:25px;
+
+  padding:24px;
+
+  margin-bottom:28px;
+
+  background:
+    radial-gradient(
+      circle at 10% 50%,
+      #5c4a0788,
+      transparent 55%
+    ),
+    linear-gradient(
+      120deg,
+      #312b12,
+      #171815
+    );
+
+  box-shadow:
+    0 18px 50px #0007;
+}
+
+.fixed-total-card:before{
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  top:0;
+  bottom:0;
+
+  width:7px;
+
+  background:var(--yellow);
+
+  box-shadow:
+    0 0 22px var(--yellow);
+}
+
+.fixed-total-label{
+  color:#b7b3a1;
+
+  font-size:14px;
+  font-weight:700;
+}
+
+.fixed-total-value{
+  color:var(--yellow);
+
+  font-size:40px;
+  font-weight:850;
+
+  letter-spacing:-1.5px;
+
+  margin-top:9px;
+}
+
+.fixed-list-title{
+  margin:
+    0 2px 10px;
+
+  font-size:19px;
+  font-weight:800;
+}
+
+.fixed-list{
+  margin-bottom:20px;
+}
+
+.fixed-item{
+  display:grid;
+
+  grid-template-columns:
+    auto 1fr auto;
+
+  gap:13px;
+
+  align-items:center;
+
+  padding:17px 3px;
+
+  border-bottom:
+    1px solid var(--line);
+}
+
+.fixed-item-value{
+  color:var(--yellow);
+
+  font-size:16px;
+  font-weight:800;
+
+  white-space:nowrap;
+}
+
+.fixed-item-description{
+  min-width:0;
+
+  color:#fff;
+
+  font-size:16px;
+  font-weight:700;
+
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.fixed-actions{
+  display:flex;
+  gap:7px;
+}
+
+.fixed-action{
+  width:38px;
+  height:38px;
+
+  border-radius:12px;
+
+  border:1px solid #30383e;
+
+  background:#151b20;
+
+  color:#fff;
+
+  display:grid;
+  place-items:center;
+
+  font-size:16px;
+
+  cursor:pointer;
+}
+
+.fixed-action.delete{
+  color:var(--red);
+
+  border-color:#54272c;
+
+  background:#241316;
+}
+
+.add-fixed-button{
+  width:100%;
+
+  border:1px solid #5b5120;
+
+  border-radius:17px;
+
+  padding:16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #393114,
+      #25220f
+    );
+
+  color:var(--yellow);
+
+  font-size:16px;
+  font-weight:800;
+
+  cursor:pointer;
+}
+
+.add-fixed-button:active,
+.fixed-action:active,
+.fixed-close:active{
+  transform:scale(.96);
+}
+
+
+/* MODAL GASTO FIXO */
+
+.fixed-form-backdrop{
+  position:fixed;
+
+  inset:0;
+
+  z-index:80;
+
+  display:flex;
+
+  align-items:flex-end;
+  justify-content:center;
+
+  background:#000b;
+
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+
+  opacity:0;
+  pointer-events:none;
+
+  transition:opacity .2s ease;
+}
+
+.fixed-form-backdrop.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.fixed-form-modal{
+  width:min(520px,100%);
+
+  background:
+    radial-gradient(
+      circle at 50% 0,
+      #3b3516,
+      transparent 40%
+    ),
+    #0c1115;
+
+  border:1px solid #34372c;
+  border-bottom:0;
+
+  border-radius:30px 30px 0 0;
+
+  padding:
+    12px
+    22px
+    calc(env(safe-area-inset-bottom) + 28px);
+
+  transform:translateY(30px);
+
+  transition:transform .25s ease;
+
+  box-shadow:
+    0 -20px 60px #000c;
+}
+
+.fixed-form-backdrop.open
+.fixed-form-modal{
+  transform:translateY(0);
+}
+
+.save-fixed{
+  width:100%;
+
+  margin-top:8px;
+
+  border:0;
+
+  border-radius:17px;
+
+  padding:17px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #4b4116,
+      #302a11
+    );
+
+  color:var(--yellow);
+
+  font-size:16px;
+  font-weight:800;
+
+  cursor:pointer;
+}
+
+.fixed-empty{
+  text-align:center;
+
+  padding:35px 10px;
+
+  color:#747c82;
+}
+  /* MOBILE */
 
 @media(max-width:390px){
 
@@ -1061,7 +1420,12 @@ R$ 0,00
 </div>
 
 
-<div class="card fixed">
+<div <div
+  class="card fixed"
+  id="openFixedExpenses"
+  role="button"
+  tabindex="0"
+>class="card fixed">
 
 <div class="label">
 Fixo
@@ -1383,7 +1747,155 @@ Excluir movimentação
 
 </div>
 
+<!-- ======================================
+     TELA DE GASTOS FIXOS
+======================================= -->
 
+<div
+  class="fixed-expenses-backdrop"
+  id="fixedExpensesPage"
+>
+
+  <div class="fixed-expenses-page">
+
+    <div class="fixed-page-header">
+
+      <div>
+        <small>My Finance</small>
+        <h2>Gastos Fixos</h2>
+      </div>
+
+      <button
+        class="fixed-close"
+        id="closeFixedExpenses"
+        aria-label="Fechar"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="fixed-total-card">
+
+      <div class="fixed-total-label">
+        Total mensal
+      </div>
+
+      <div
+        class="fixed-total-value"
+        id="fixedExpensesTotal"
+      >
+        R$ 0,00
+      </div>
+
+    </div>
+
+
+    <div class="fixed-list-title">
+      Seus gastos fixos
+    </div>
+
+
+    <div
+      class="fixed-list"
+      id="fixedExpensesList"
+    >
+
+      <div class="fixed-empty">
+        Nenhum gasto fixo cadastrado.
+      </div>
+
+    </div>
+
+
+    <button
+      class="add-fixed-button"
+      id="addFixedExpense"
+    >
+      + Adicionar gasto fixo
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- ======================================
+     MODAL ADICIONAR / EDITAR FIXO
+======================================= -->
+
+<div
+  class="fixed-form-backdrop"
+  id="fixedExpenseModal"
+>
+
+  <div class="fixed-form-modal">
+
+    <div class="modal-handle"></div>
+
+
+    <div class="modal-header">
+
+      <h2 id="fixedModalTitle">
+        Novo gasto fixo
+      </h2>
+
+      <button
+        class="close-modal"
+        id="closeFixedExpenseModal"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="fixedDescription">
+        Descrição
+      </label>
+
+      <input
+        class="form-input"
+        id="fixedDescription"
+        type="text"
+        placeholder="Ex.: Netflix"
+        autocomplete="off"
+      >
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="fixedValue">
+        Valor mensal
+      </label>
+
+      <input
+        class="form-input value-input"
+        id="fixedValue"
+        type="text"
+        inputmode="decimal"
+        placeholder="R$ 0,00"
+        autocomplete="off"
+      >
+
+    </div>
+
+
+    <button
+      class="save-fixed"
+      id="saveFixedExpense"
+    >
+      Adicionar gasto fixo
+    </button>
+
+  </div>
+
+</div>
 <script src="app.js"></script>
 
 </body>
