@@ -2844,7 +2844,22 @@ Excluir movimentação
   </div>
 
 </div>
-<script src="app.js?v=4"></script> 
+ close?.addEventListener(
+    "click",
+    () => {
+
+      page?.classList.remove(
+        "open"
+      );
+
+      document.body.classList.remove(
+        "modal-open"
+      );
+    }
+  );
+
+})();
+</script>
 
 </body>
 </html>
