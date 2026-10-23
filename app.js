@@ -2,6 +2,8 @@ const API_URL =
   "https://script.google.com/macros/s/AKfycbwo3qeXL_2q-oeKyecG3yziIASv3jrGVxLv9MMV-3hnls6g2A5HsUEZMzXLb2iDBRLQ/exec";
 
 let transactions = [];
+let fixedExpenses = [];
+
 let currentPeriod = "month";
 let selectedDate = new Date();
 let manualType = "Gasto";
@@ -10,7 +12,7 @@ let manualCategory = "Alimentação";
 /* null = nova movimentação
    número = linha sendo editada */
 let editingRow = null;
-
+let editingFixedRow = null;
 const money = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL"
@@ -58,9 +60,17 @@ async function loadTransactions() {
     }
 
     transactions =
-      Array.isArray(result.data)
-        ? result.data
-        : [];
+  Array.isArray(result.data)
+    ? result.data
+    : [];
+
+fixedExpenses =
+  Array.isArray(result.fixed)
+    ? result.fixed
+    : [];
+
+render();
+renderFixedExpenses();
 
     render();
 
@@ -316,24 +326,41 @@ function render() {
 
   items.forEach(item => {
 
-    const type =
-      getType(item.type);
+  const type =
+    getType(item.type);
 
-    if (type === "income") {
+  if (type === "income") {
 
-      income += item.value;
+    income += item.value;
 
-    } else if (
-      type === "fixed"
-    ) {
+  } else if (
+    type === "expense"
+  ) {
 
-      fixed += item.value;
+    expense += item.value;
+  }
+});
 
-    } else {
 
-      expense += item.value;
-    }
-  });
+/*
+  Gastos fixos são recorrentes.
+  Por isso não dependem do mês
+  selecionado.
+*/
+
+fixed =
+  fixedExpenses.reduce(
+    (total, item) => {
+
+      return total +
+        parseMoney(
+          item.Valor ??
+          item.valor ??
+          0
+        );
+    },
+    0
+  );
 
   const balance =
     income - expense - fixed;
@@ -1130,7 +1157,726 @@ function resetManualForm() {
       );
     });
 }
+/* =========================
+   GASTOS FIXOS
+========================= */
 
+const fixedExpensesPage =
+  document.getElementById(
+    "fixedExpensesPage"
+  );
+
+const openFixedExpenses =
+  document.getElementById(
+    "openFixedExpenses"
+  );
+
+const closeFixedExpenses =
+  document.getElementById(
+    "closeFixedExpenses"
+  );
+
+const fixedExpensesList =
+  document.getElementById(
+    "fixedExpensesList"
+  );
+
+const fixedExpensesTotal =
+  document.getElementById(
+    "fixedExpensesTotal"
+  );
+
+const addFixedExpense =
+  document.getElementById(
+    "addFixedExpense"
+  );
+
+const fixedExpenseModal =
+  document.getElementById(
+    "fixedExpenseModal"
+  );
+
+const closeFixedExpenseModal =
+  document.getElementById(
+    "closeFixedExpenseModal"
+  );
+
+const fixedModalTitle =
+  document.getElementById(
+    "fixedModalTitle"
+  );
+
+const fixedDescription =
+  document.getElementById(
+    "fixedDescription"
+  );
+
+const fixedValue =
+  document.getElementById(
+    "fixedValue"
+  );
+
+const saveFixedExpense =
+  document.getElementById(
+    "saveFixedExpense"
+  );
+
+
+/* NORMALIZAR FIXO */
+
+function normalizeFixedExpense(
+  item
+) {
+
+  return {
+
+    row: Number(
+      item._row ??
+      item.row ??
+      0
+    ),
+
+    description:
+      String(
+        item.Descrição ??
+        item.Descricao ??
+        item.descrição ??
+        item.descricao ??
+        ""
+      ).trim(),
+
+    value:
+      parseMoney(
+        item.Valor ??
+        item.valor ??
+        0
+      )
+  };
+}
+
+
+/* RENDERIZAR FIXOS */
+
+function renderFixedExpenses() {
+
+  const items =
+    fixedExpenses
+      .map(
+        normalizeFixedExpense
+      );
+
+  const total =
+    items.reduce(
+      (sum, item) =>
+        sum + item.value,
+      0
+    );
+
+
+  if (fixedExpensesTotal) {
+
+    fixedExpensesTotal.textContent =
+      money.format(total);
+  }
+
+
+  if (!fixedExpensesList) {
+    return;
+  }
+
+
+  if (!items.length) {
+
+    fixedExpensesList.innerHTML = `
+      <div class="fixed-empty">
+        Nenhum gasto fixo cadastrado.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  fixedExpensesList.innerHTML =
+    items.map(item => {
+
+      return `
+        <div class="fixed-item">
+
+          <div class="fixed-item-value">
+            ${money.format(item.value)}
+          </div>
+
+          <div class="fixed-item-description">
+            ${escapeHtml(
+              item.description
+            )}
+          </div>
+
+          <div class="fixed-actions">
+
+            <button
+              class="fixed-action edit-fixed"
+              data-row="${item.row}"
+              aria-label="Editar"
+            >
+              ✏️
+            </button>
+
+            <button
+              class="fixed-action delete delete-fixed"
+              data-row="${item.row}"
+              aria-label="Excluir"
+            >
+              🗑️
+            </button>
+
+          </div>
+
+        </div>
+      `;
+    }).join("");
+
+
+  fixedExpensesList
+    .querySelectorAll(
+      ".edit-fixed"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          openFixedEditModal(
+            Number(
+              button.dataset.row
+            )
+          );
+        }
+      );
+    });
+
+
+  fixedExpensesList
+    .querySelectorAll(
+      ".delete-fixed"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          deleteFixedExpense(
+            Number(
+              button.dataset.row
+            )
+          );
+        }
+      );
+    });
+}
+
+
+/* ABRIR TELA */
+
+function showFixedExpenses() {
+
+  if (!fixedExpensesPage) {
+    return;
+  }
+
+  renderFixedExpenses();
+
+  fixedExpensesPage
+    .classList.add("open");
+
+  document.body
+    .classList.add(
+      "modal-open"
+    );
+}
+
+
+/* FECHAR TELA */
+
+function hideFixedExpenses() {
+
+  if (!fixedExpensesPage) {
+    return;
+  }
+
+  fixedExpensesPage
+    .classList.remove("open");
+
+  document.body
+    .classList.remove(
+      "modal-open"
+    );
+}
+
+
+openFixedExpenses
+  ?.addEventListener(
+    "click",
+    showFixedExpenses
+  );
+
+
+closeFixedExpenses
+  ?.addEventListener(
+    "click",
+    hideFixedExpenses
+  );
+
+
+/* NOVO FIXO */
+
+function openNewFixedModal() {
+
+  editingFixedRow = null;
+
+  if (fixedDescription) {
+    fixedDescription.value = "";
+  }
+
+  if (fixedValue) {
+    fixedValue.value = "";
+  }
+
+  if (fixedModalTitle) {
+
+    fixedModalTitle.textContent =
+      "Novo gasto fixo";
+  }
+
+  if (saveFixedExpense) {
+
+    saveFixedExpense.textContent =
+      "Adicionar gasto fixo";
+  }
+
+  fixedExpenseModal
+    ?.classList.add("open");
+
+  document.body
+    .classList.add(
+      "modal-open"
+    );
+
+  setTimeout(() => {
+
+    fixedDescription
+      ?.focus();
+
+  }, 250);
+}
+
+
+addFixedExpense
+  ?.addEventListener(
+    "click",
+    openNewFixedModal
+  );
+
+
+/* EDITAR FIXO */
+
+function openFixedEditModal(row) {
+
+  const item =
+    fixedExpenses
+      .map(
+        normalizeFixedExpense
+      )
+      .find(
+        item =>
+          item.row === row
+      );
+
+
+  if (!item) {
+
+    alert(
+      "Não foi possível localizar este gasto fixo."
+    );
+
+    return;
+  }
+
+
+  editingFixedRow = row;
+
+
+  if (fixedDescription) {
+
+    fixedDescription.value =
+      item.description;
+  }
+
+
+  if (fixedValue) {
+
+    fixedValue.value =
+      money.format(
+        item.value
+      );
+  }
+
+
+  if (fixedModalTitle) {
+
+    fixedModalTitle.textContent =
+      "Editar gasto fixo";
+  }
+
+
+  if (saveFixedExpense) {
+
+    saveFixedExpense.textContent =
+      "Salvar alterações";
+  }
+
+
+  fixedExpenseModal
+    ?.classList.add("open");
+
+  document.body
+    .classList.add(
+      "modal-open"
+    );
+}
+
+
+/* FECHAR MODAL FIXO */
+
+function hideFixedExpenseModal() {
+
+  fixedExpenseModal
+    ?.classList.remove("open");
+
+  editingFixedRow = null;
+
+  /*
+    A página de gastos fixos
+    continua aberta.
+  */
+
+  if (
+    !fixedExpensesPage
+      ?.classList
+      .contains("open")
+  ) {
+
+    document.body
+      .classList.remove(
+        "modal-open"
+      );
+  }
+}
+
+
+closeFixedExpenseModal
+  ?.addEventListener(
+    "click",
+    hideFixedExpenseModal
+  );
+
+
+fixedExpenseModal
+  ?.addEventListener(
+    "click",
+    event => {
+
+      if (
+        event.target ===
+          fixedExpenseModal
+      ) {
+
+        hideFixedExpenseModal();
+      }
+    }
+  );
+
+
+/* FORMATAR VALOR FIXO */
+
+fixedValue
+  ?.addEventListener(
+    "input",
+    event => {
+
+      const digits =
+        event.target.value
+          .replace(/\D/g, "");
+
+      if (!digits) {
+
+        event.target.value = "";
+
+        return;
+      }
+
+      const value =
+        Number(digits) / 100;
+
+      event.target.value =
+        money.format(value);
+    }
+  );
+
+
+function getFixedValue() {
+
+  if (!fixedValue) {
+    return 0;
+  }
+
+  const digits =
+    fixedValue.value
+      .replace(/\D/g, "");
+
+  if (!digits) {
+    return 0;
+  }
+
+  return Number(digits) / 100;
+}
+
+
+/* SALVAR FIXO */
+
+saveFixedExpense
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      const description =
+        fixedDescription
+          ?.value
+          .trim() || "";
+
+      const value =
+        getFixedValue();
+
+
+      if (!description) {
+
+        alert(
+          "Digite uma descrição."
+        );
+
+        return;
+      }
+
+
+      if (value <= 0) {
+
+        alert(
+          "Digite um valor válido."
+        );
+
+        return;
+      }
+
+
+      const isEditing =
+        editingFixedRow !== null;
+
+
+      try {
+
+        saveFixedExpense.disabled =
+          true;
+
+        saveFixedExpense.textContent =
+          isEditing
+            ? "Salvando..."
+            : "Adicionando...";
+
+
+        const payload = {
+
+          action:
+            isEditing
+              ? "fixed_update"
+              : "fixed_create",
+
+          descricao:
+            description,
+
+          amount:
+            value
+        };
+
+
+        if (isEditing) {
+
+          payload.row =
+            editingFixedRow;
+        }
+
+
+        const response =
+          await fetch(
+            API_URL,
+            {
+
+              method: "POST",
+
+              headers: {
+
+                "Content-Type":
+                  "text/plain;charset=utf-8"
+              },
+
+              body:
+                JSON.stringify(
+                  payload
+                )
+            }
+          );
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            "Não foi possível salvar."
+          );
+        }
+
+
+        const result =
+          await response.json();
+
+
+        if (!result.success) {
+
+          throw new Error(
+            result.error ||
+            "Erro ao salvar gasto fixo."
+          );
+        }
+
+
+        hideFixedExpenseModal();
+
+        await loadTransactions();
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Não foi possível salvar o gasto fixo. Tente novamente."
+        );
+
+
+      } finally {
+
+        saveFixedExpense.disabled =
+          false;
+
+        saveFixedExpense.textContent =
+          "Adicionar gasto fixo";
+      }
+    }
+  );
+
+
+/* EXCLUIR FIXO */
+
+async function deleteFixedExpense(
+  row
+) {
+
+  const item =
+    fixedExpenses
+      .map(
+        normalizeFixedExpense
+      )
+      .find(
+        item =>
+          item.row === row
+      );
+
+
+  const confirmed =
+    confirm(
+      item
+        ? `Excluir "${item.description}"?`
+        : "Excluir este gasto fixo?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type":
+              "text/plain;charset=utf-8"
+          },
+
+          body:
+            JSON.stringify({
+
+              action:
+                "fixed_delete",
+
+              row:
+                row
+            })
+        }
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        "Não foi possível excluir."
+      );
+    }
+
+
+    const result =
+      await response.json();
+
+
+    if (!result.success) {
+
+      throw new Error(
+        result.error ||
+        "Erro ao excluir."
+      );
+    }
+
+
+    await loadTransactions();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Não foi possível excluir o gasto fixo. Tente novamente."
+    );
+  }
+}
 /* =========================
    HISTÓRICO / CALENDÁRIO
 ========================= */
