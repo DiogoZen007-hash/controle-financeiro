@@ -7,6 +7,10 @@ let currentPeriod = "month";
 let manualType = "Gasto";
 let manualCategory = "Alimentação";
 
+/* null = nova movimentação
+   número = linha sendo editada */
+let editingRow = null;
+
 const money = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL"
@@ -19,12 +23,13 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
 
 
 /* =========================
-   CARREGAR MOVIMENTAÇÕES
+   CARREGAR
 ========================= */
 
 async function loadTransactions() {
 
-  const sync = document.getElementById("sync");
+  const sync =
+    document.getElementById("sync");
 
   try {
 
@@ -37,25 +42,31 @@ async function loadTransactions() {
     );
 
     if (!response.ok) {
-      throw new Error("Erro ao acessar a planilha");
-    }
-
-    const result = await response.json();
-
-    if (!result.success) {
       throw new Error(
-        result.error || "Erro ao carregar dados"
+        "Erro ao acessar a planilha"
       );
     }
 
-    transactions = Array.isArray(result.data)
-      ? result.data
-      : [];
+    const result =
+      await response.json();
+
+    if (!result.success) {
+      throw new Error(
+        result.error ||
+        "Erro ao carregar dados"
+      );
+    }
+
+    transactions =
+      Array.isArray(result.data)
+        ? result.data
+        : [];
 
     render();
 
     if (sync) {
-      sync.textContent = "✓ Sincronizado";
+      sync.textContent =
+        "✓ Sincronizado";
     }
 
   } catch (error) {
@@ -63,19 +74,26 @@ async function loadTransactions() {
     console.error(error);
 
     if (sync) {
-      sync.textContent = "⚠ Erro de sincronização";
+      sync.textContent =
+        "⚠ Erro de sincronização";
     }
   }
 }
 
 
 /* =========================
-   NORMALIZAR DADOS
+   NORMALIZAR
 ========================= */
 
 function normalizeTransaction(item) {
 
   return {
+
+    row: Number(
+      item._row ??
+      item.row ??
+      0
+    ),
 
     date: parseDate(
       item.Data ??
@@ -144,7 +162,8 @@ function parseMoney(value) {
 
   } else if (text.includes(",")) {
 
-    text = text.replace(",", ".");
+    text =
+      text.replace(",", ".");
   }
 
   const number = Number(text);
@@ -161,15 +180,17 @@ function parseDate(value) {
     return new Date();
   }
 
-  const direct = new Date(value);
+  const direct =
+    new Date(value);
 
   if (!isNaN(direct.getTime())) {
     return direct;
   }
 
-  const parts = String(value).match(
-    /^(\d{1,2})\/(\d{1,2})\/(\d{4})/
-  );
+  const parts =
+    String(value).match(
+      /^(\d{1,2})\/(\d{1,2})\/(\d{4})/
+    );
 
   if (parts) {
 
@@ -190,10 +211,14 @@ function parseDate(value) {
 
 function getType(type) {
 
-  const text = String(type)
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+  const text =
+    String(type)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(
+        /[\u0300-\u036f]/g,
+        ""
+      );
 
   if (
     text.includes("entrada") ||
@@ -225,8 +250,10 @@ function isInPeriod(date, period) {
   if (period === "month") {
 
     return (
-      date.getMonth() === now.getMonth() &&
-      date.getFullYear() === now.getFullYear()
+      date.getMonth() ===
+        now.getMonth() &&
+      date.getFullYear() ===
+        now.getFullYear()
     );
   }
 
@@ -241,7 +268,8 @@ function isInPeriod(date, period) {
       ? 7
       : today.getDay();
 
-  const monday = new Date(today);
+  const monday =
+    new Date(today);
 
   monday.setDate(
     today.getDate() - day + 1
@@ -249,7 +277,8 @@ function isInPeriod(date, period) {
 
   monday.setHours(0, 0, 0, 0);
 
-  const nextMonday = new Date(monday);
+  const nextMonday =
+    new Date(monday);
 
   nextMonday.setDate(
     monday.getDate() + 7
@@ -268,18 +297,19 @@ function isInPeriod(date, period) {
 
 function render() {
 
-  const items = transactions
-    .map(normalizeTransaction)
-    .filter(item =>
-      isInPeriod(
-        item.date,
-        currentPeriod
+  const items =
+    transactions
+      .map(normalizeTransaction)
+      .filter(item =>
+        isInPeriod(
+          item.date,
+          currentPeriod
+        )
       )
-    )
-    .sort(
-      (a, b) =>
-        b.date - a.date
-    );
+      .sort(
+        (a, b) =>
+          b.date - a.date
+      );
 
   let income = 0;
   let expense = 0;
@@ -294,7 +324,9 @@ function render() {
 
       income += item.value;
 
-    } else if (type === "fixed") {
+    } else if (
+      type === "fixed"
+    ) {
 
       fixed += item.value;
 
@@ -350,7 +382,7 @@ function setText(id, text) {
 
 
 /* =========================
-   LISTA DE MOVIMENTAÇÕES
+   MOVIMENTAÇÕES
 ========================= */
 
 function renderTransactions(items) {
@@ -373,8 +405,8 @@ function renderTransactions(items) {
     return;
   }
 
-  container.innerHTML = items
-    .map(item => {
+  container.innerHTML =
+    items.map(item => {
 
       const type =
         getType(item.type);
@@ -383,22 +415,27 @@ function renderTransactions(items) {
       let symbol = "−";
 
       if (type === "income") {
-
         cssClass = "green";
         symbol = "+";
       }
 
       if (type === "fixed") {
-
         cssClass = "yellow";
       }
 
-      const secondary = item.category
-        ? `${dateFormatter.format(item.date)} • ${escapeHtml(item.category)}`
-        : `${dateFormatter.format(item.date)} • ${escapeHtml(item.type)}`;
+      const secondary =
+        item.category
+          ? `${dateFormatter.format(item.date)} • ${escapeHtml(item.category)}`
+          : `${dateFormatter.format(item.date)} • ${escapeHtml(item.type)}`;
 
       return `
-        <div class="tx">
+        <div
+          class="tx"
+          data-row="${item.row}"
+          role="button"
+          tabindex="0"
+          style="cursor:pointer"
+        >
 
           <div class="dot ${cssClass}">
           </div>
@@ -421,8 +458,23 @@ function renderTransactions(items) {
 
         </div>
       `;
-    })
-    .join("");
+    }).join("");
+
+  container
+    .querySelectorAll(".tx")
+    .forEach(element => {
+
+      element.addEventListener(
+        "click",
+        () => {
+
+          const row =
+            Number(element.dataset.row);
+
+          openEditModal(row);
+        }
+      );
+    });
 }
 
 
@@ -450,11 +502,12 @@ document
       () => {
 
         document
-          .querySelectorAll("[data-period]")
-          .forEach(item => {
-
-            item.classList.remove("on");
-          });
+          .querySelectorAll(
+            "[data-period]"
+          )
+          .forEach(item =>
+            item.classList.remove("on")
+          );
 
         button.classList.add("on");
 
@@ -486,8 +539,18 @@ const closeModalButton =
     "closeTransactionModal"
   );
 
+const modalTitle =
+  document.getElementById(
+    "transactionModalTitle"
+  );
 
-function openModal() {
+const deleteButton =
+  document.getElementById(
+    "deleteTransaction"
+  );
+
+
+function showModal() {
 
   if (!modal) return;
 
@@ -500,10 +563,127 @@ function openModal() {
   setTimeout(() => {
 
     document
-      .getElementById("manualValue")
+      .getElementById(
+        "manualValue"
+      )
       ?.focus();
 
   }, 250);
+}
+
+
+function openNewModal() {
+
+  editingRow = null;
+
+  resetManualForm();
+
+  if (modalTitle) {
+    modalTitle.textContent =
+      "Nova movimentação";
+  }
+
+  if (saveButton) {
+    saveButton.textContent =
+      "Adicionar movimentação";
+  }
+
+  if (deleteButton) {
+    deleteButton.style.display =
+      "none";
+  }
+
+  showModal();
+}
+
+
+function openEditModal(row) {
+
+  const item =
+    transactions
+      .map(normalizeTransaction)
+      .find(transaction =>
+        transaction.row === row
+      );
+
+  if (!item) {
+    alert(
+      "Não foi possível localizar esta movimentação."
+    );
+    return;
+  }
+
+  editingRow = row;
+
+  manualType =
+    item.type || "Gasto";
+
+  manualCategory =
+    item.category ||
+    "Outros";
+
+  const value =
+    document.getElementById(
+      "manualValue"
+    );
+
+  const description =
+    document.getElementById(
+      "manualDescription"
+    );
+
+  if (value) {
+    value.value =
+      money.format(item.value);
+  }
+
+  if (description) {
+    description.value =
+      item.description;
+  }
+
+  document
+    .querySelectorAll(
+      ".type-option"
+    )
+    .forEach(button => {
+
+      button.classList.toggle(
+        "active",
+        button.dataset.type ===
+          manualType
+      );
+    });
+
+  document
+    .querySelectorAll(
+      ".category"
+    )
+    .forEach(button => {
+
+      button.classList.toggle(
+        "active",
+        button.dataset.category ===
+          manualCategory
+      );
+    });
+
+  if (modalTitle) {
+    modalTitle.textContent =
+      "Editar movimentação";
+  }
+
+  if (saveButton) {
+    saveButton.textContent =
+      "Salvar alterações";
+  }
+
+  if (deleteButton) {
+    deleteButton.style.display =
+      "block";
+  }
+
+  showModal();
 }
 
 
@@ -521,7 +701,7 @@ function closeModal() {
 
 openModalButton?.addEventListener(
   "click",
-  openModal
+  openNewModal
 );
 
 
@@ -543,7 +723,7 @@ modal?.addEventListener(
 
 
 /* =========================
-   ESCOLHER TIPO
+   TIPO
 ========================= */
 
 document
@@ -558,12 +738,11 @@ document
           .querySelectorAll(
             ".type-option"
           )
-          .forEach(item => {
-
+          .forEach(item =>
             item.classList.remove(
               "active"
-            );
-          });
+            )
+          );
 
         button.classList.add(
           "active"
@@ -577,7 +756,7 @@ document
 
 
 /* =========================
-   ESCOLHER CATEGORIA
+   CATEGORIA
 ========================= */
 
 document
@@ -592,12 +771,11 @@ document
           .querySelectorAll(
             ".category"
           )
-          .forEach(item => {
-
+          .forEach(item =>
             item.classList.remove(
               "active"
-            );
-          });
+            )
+          );
 
         button.classList.add(
           "active"
@@ -611,7 +789,7 @@ document
 
 
 /* =========================
-   FORMATAR VALOR
+   VALOR
 ========================= */
 
 const manualValue =
@@ -662,7 +840,7 @@ function getManualValue() {
 
 
 /* =========================
-   SALVAR MOVIMENTAÇÃO
+   SALVAR / EDITAR
 ========================= */
 
 const saveButton =
@@ -704,34 +882,57 @@ saveButton?.addEventListener(
       return;
     }
 
-    const originalText =
-      saveButton.textContent;
+    const isEditing =
+      editingRow !== null;
 
     try {
 
       saveButton.disabled = true;
 
       saveButton.textContent =
-        "Adicionando...";
+        isEditing
+          ? "Salvando..."
+          : "Adicionando...";
 
-      const response = await fetch(
-        API_URL,
-        {
-          method: "POST",
+      const payload = {
 
-          headers: {
-            "Content-Type":
-              "text/plain;charset=utf-8"
-          },
+        action:
+          isEditing
+            ? "update"
+            : "create",
 
-          body: JSON.stringify({
-            tipo: manualType,
-            descricao: description,
-            categoria: manualCategory,
-            amount: value
-          })
-        }
-      );
+        tipo: manualType,
+
+        descricao:
+          description,
+
+        categoria:
+          manualCategory,
+
+        amount: value
+      };
+
+      if (isEditing) {
+        payload.row = editingRow;
+      }
+
+      const response =
+        await fetch(
+          API_URL,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+
+            body:
+              JSON.stringify(
+                payload
+              )
+          }
+        );
 
       if (!response.ok) {
 
@@ -753,6 +954,8 @@ saveButton?.addEventListener(
 
       closeModal();
 
+      editingRow = null;
+
       resetManualForm();
 
       await loadTransactions();
@@ -762,7 +965,7 @@ saveButton?.addEventListener(
       console.error(error);
 
       alert(
-        "Não foi possível adicionar a movimentação. Tente novamente."
+        "Não foi possível salvar a movimentação. Tente novamente."
       );
 
     } finally {
@@ -770,7 +973,104 @@ saveButton?.addEventListener(
       saveButton.disabled = false;
 
       saveButton.textContent =
-        originalText;
+        editingRow === null
+          ? "Adicionar movimentação"
+          : "Salvar alterações";
+    }
+  }
+);
+
+
+/* =========================
+   EXCLUIR
+========================= */
+
+deleteButton?.addEventListener(
+  "click",
+  async () => {
+
+    if (editingRow === null) {
+      return;
+    }
+
+    const confirmed =
+      confirm(
+        "Excluir esta movimentação?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const rowToDelete =
+      editingRow;
+
+    try {
+
+      deleteButton.disabled = true;
+
+      deleteButton.textContent =
+        "Excluindo...";
+
+      const response =
+        await fetch(
+          API_URL,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+
+            body:
+              JSON.stringify({
+                action: "delete",
+                row: rowToDelete
+              })
+          }
+        );
+
+      if (!response.ok) {
+
+        throw new Error(
+          "Não foi possível excluir."
+        );
+      }
+
+      const result =
+        await response.json();
+
+      if (!result.success) {
+
+        throw new Error(
+          result.error ||
+          "Erro ao excluir."
+        );
+      }
+
+      editingRow = null;
+
+      closeModal();
+
+      resetManualForm();
+
+      await loadTransactions();
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Não foi possível excluir a movimentação. Tente novamente."
+      );
+
+    } finally {
+
+      deleteButton.disabled = false;
+
+      deleteButton.textContent =
+        "Excluir movimentação";
     }
   }
 );
@@ -801,7 +1101,9 @@ function resetManualForm() {
   }
 
   manualType = "Gasto";
-  manualCategory = "Alimentação";
+
+  manualCategory =
+    "Alimentação";
 
   document
     .querySelectorAll(
@@ -811,7 +1113,8 @@ function resetManualForm() {
 
       button.classList.toggle(
         "active",
-        button.dataset.type === "Gasto"
+        button.dataset.type ===
+          "Gasto"
       );
     });
 
@@ -849,7 +1152,7 @@ document.addEventListener(
 
     if (
       document.visibilityState ===
-      "visible"
+        "visible"
     ) {
 
       loadTransactions();
