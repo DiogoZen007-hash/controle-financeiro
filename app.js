@@ -1432,22 +1432,6 @@ function renderFixedExpenses() {
 /* ========================================
    TELA DE GASTOS
 ======================================== */
-function renderExpensesPage() {
-
-  const items =
-    transactions
-      .map(normalizeTransaction)
-      .filter(item =>
-        isInPeriod(
-          item.date,
-          currentPeriod
-        )
-      )
-      .sort(
-        (a, b) =>
-          b.date - a.date
-      );
-
 
   const expenseItems =
     items.filter(
