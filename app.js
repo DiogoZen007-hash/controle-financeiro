@@ -6,6 +6,12 @@ let fixedExpenses = [];
 
 let currentPeriod = "month";
 let selectedDate = new Date();
+
+/*
+  null = mês/semana
+  Date = dia específico
+*/
+let selectedDay = null;
 let manualType = "Gasto";
 let manualCategory = "Alimentação";
 
@@ -254,7 +260,19 @@ function getType(type) {
 ========================= */
 
 function isInPeriod(date, period) {
+if (selectedDay) {
 
+  return (
+    date.getDate() ===
+      selectedDay.getDate() &&
+
+    date.getMonth() ===
+      selectedDay.getMonth() &&
+
+    date.getFullYear() ===
+      selectedDay.getFullYear()
+  );
+}
   if (period === "month") {
 
     return (
@@ -385,12 +403,32 @@ fixed =
     money.format(balance)
   );
 
-  setText(
-    "periodLabel",
+  let periodText;
+
+if (selectedDay) {
+
+  periodText =
+    selectedDay.toLocaleDateString(
+      "pt-BR",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      }
+    );
+
+} else {
+
+  periodText =
     currentPeriod === "month"
       ? "Este mês"
-      : "Esta semana"
-  );
+      : "Esta semana";
+}
+
+setText(
+  "periodLabel",
+  periodText
+);
 
   renderTransactions(items);
 }
@@ -538,9 +576,11 @@ document
         button.classList.add("on");
 
         currentPeriod =
-          button.dataset.period;
+  button.dataset.period;
 
-        render();
+selectedDay = null;
+
+render();
       }
     );
   });
@@ -1915,7 +1955,15 @@ const currentMonthButton =
   document.getElementById(
     "currentMonthButton"
   );
+const calendarDays =
+  document.getElementById(
+    "calendarDays"
+  );
 
+const showWholeMonth =
+  document.getElementById(
+    "showWholeMonth"
+  );
 
 const monthFormatter =
   new Intl.DateTimeFormat(
@@ -1944,14 +1992,223 @@ function updateSelectedMonth() {
     text;
 }
 
+function renderCalendarDays() {
 
+  if (!calendarDays) {
+    return;
+  }
+
+  calendarDays.innerHTML = "";
+
+
+  const year =
+    selectedDate.getFullYear();
+
+  const month =
+    selectedDate.getMonth();
+
+
+  const firstDay =
+    new Date(
+      year,
+      month,
+      1
+    );
+
+
+  const lastDay =
+    new Date(
+      year,
+      month + 1,
+      0
+    );
+
+
+  /*
+    Segunda = primeira coluna.
+    Domingo = última.
+  */
+
+  const offset =
+    firstDay.getDay() === 0
+      ? 6
+      : firstDay.getDay() - 1;
+
+
+  for (
+    let i = 0;
+    i < offset;
+    i++
+  ) {
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "calendar-day empty";
+
+    calendarDays.appendChild(
+      empty
+    );
+  }
+
+
+  const today =
+    new Date();
+
+
+  for (
+    let day = 1;
+    day <= lastDay.getDate();
+    day++
+  ) {
+
+    const date =
+      new Date(
+        year,
+        month,
+        day
+      );
+
+
+    const button =
+      document.createElement(
+        "button"
+      );
+
+    button.className =
+      "calendar-day";
+
+    button.textContent =
+      day;
+
+
+    /* HOJE */
+
+    if (
+      date.getDate() ===
+        today.getDate() &&
+      date.getMonth() ===
+        today.getMonth() &&
+      date.getFullYear() ===
+        today.getFullYear()
+    ) {
+
+      button.classList.add(
+        "today"
+      );
+    }
+
+
+    /* DIA SELECIONADO */
+
+    if (
+      selectedDay &&
+      date.getDate() ===
+        selectedDay.getDate() &&
+      date.getMonth() ===
+        selectedDay.getMonth() &&
+      date.getFullYear() ===
+        selectedDay.getFullYear()
+    ) {
+
+      button.classList.add(
+        "selected"
+      );
+    }
+
+
+    /* POSSUI MOVIMENTAÇÕES */
+
+    const hasTransactions =
+      transactions
+        .map(
+          normalizeTransaction
+        )
+        .some(item => {
+
+          return (
+            item.date.getDate() ===
+              day &&
+
+            item.date.getMonth() ===
+              month &&
+
+            item.date.getFullYear() ===
+              year
+          );
+        });
+
+
+    if (hasTransactions) {
+
+      button.classList.add(
+        "has-transactions"
+      );
+    }
+
+
+    /* SELECIONAR DIA */
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        selectedDay =
+          new Date(
+            year,
+            month,
+            day
+          );
+
+        selectedDate =
+          new Date(
+            year,
+            month,
+            day
+          );
+
+        currentPeriod =
+          "month";
+
+        document
+          .querySelectorAll(
+            "[data-period]"
+          )
+          .forEach(periodButton => {
+
+            periodButton
+              .classList.toggle(
+                "on",
+                periodButton
+                  .dataset
+                  .period ===
+                    "month"
+              );
+          });
+
+        render();
+
+        closeMonthModal();
+      }
+    );
+
+
+    calendarDays.appendChild(
+      button
+    );
+  }
+}
 function openMonthModal() {
 
   if (!monthModal) return;
 
   updateSelectedMonth();
+renderCalendarDays();
 
-  monthModal.classList.add(
+monthModal.classList.add(
     "open"
   );
 
@@ -1984,6 +2241,9 @@ function changeMonth(amount) {
       1
     );
 
+  // Remove qualquer dia específico selecionado
+  selectedDay = null;
+
   currentPeriod = "month";
 
   document
@@ -2000,6 +2260,9 @@ function changeMonth(amount) {
     });
 
   updateSelectedMonth();
+
+  // Atualiza os dias exibidos no calendário
+  renderCalendarDays();
 
   render();
 }
@@ -2032,7 +2295,34 @@ nextMonth?.addEventListener(
   }
 );
 
+showWholeMonth
+  ?.addEventListener(
+    "click",
+    () => {
 
+      selectedDay = null;
+
+      currentPeriod =
+        "month";
+
+      document
+        .querySelectorAll(
+          "[data-period]"
+        )
+        .forEach(button => {
+
+          button.classList.toggle(
+            "on",
+            button.dataset.period ===
+              "month"
+          );
+        });
+
+      render();
+
+      closeMonthModal();
+    }
+  );
 currentMonthButton?.addEventListener(
   "click",
   () => {
@@ -2040,6 +2330,8 @@ currentMonthButton?.addEventListener(
     selectedDate =
       new Date();
 
+    selectedDay = null;
+    
     currentPeriod =
       "month";
 
