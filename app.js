@@ -2323,6 +2323,34 @@ showWholeMonth
       closeMonthModal();
     }
   );
+showWholeMonth
+  ?.addEventListener(
+    "click",
+    () => {
+
+      selectedDay = null;
+
+      currentPeriod =
+        "month";
+
+      document
+        .querySelectorAll(
+          "[data-period]"
+        )
+        .forEach(button => {
+
+          button.classList.toggle(
+            "on",
+            button.dataset.period ===
+              "month"
+          );
+        });
+
+      render();
+
+      closeMonthModal();
+    }
+  );
 currentMonthButton?.addEventListener(
   "click",
   () => {
