@@ -4,6 +4,9 @@ const API_URL =
 let transactions = [];
 let currentPeriod = "month";
 
+let manualType = "Gasto";
+let manualCategory = "Alimentação";
+
 const money = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL"
@@ -14,10 +17,17 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   month: "2-digit"
 });
 
+
+/* =========================
+   CARREGAR MOVIMENTAÇÕES
+========================= */
+
 async function loadTransactions() {
+
   const sync = document.getElementById("sync");
 
   try {
+
     if (sync) {
       sync.textContent = "Sincronizando...";
     }
@@ -49,6 +59,7 @@ async function loadTransactions() {
     }
 
   } catch (error) {
+
     console.error(error);
 
     if (sync) {
@@ -57,8 +68,15 @@ async function loadTransactions() {
   }
 }
 
+
+/* =========================
+   NORMALIZAR DADOS
+========================= */
+
 function normalizeTransaction(item) {
+
   return {
+
     date: parseDate(
       item.Data ??
       item.data ??
@@ -84,6 +102,14 @@ function normalizeTransaction(item) {
       "Sem descrição"
     ).trim(),
 
+    category: String(
+      item.Categoria ??
+      item.categoria ??
+      item.Category ??
+      item.category ??
+      ""
+    ).trim(),
+
     value: parseMoney(
       item.Valor ??
       item.valor ??
@@ -94,7 +120,9 @@ function normalizeTransaction(item) {
   };
 }
 
+
 function parseMoney(value) {
+
   if (typeof value === "number") {
     return value;
   }
@@ -105,11 +133,17 @@ function parseMoney(value) {
     .replace("R$", "")
     .trim();
 
-  if (text.includes(",") && text.includes(".")) {
+  if (
+    text.includes(",") &&
+    text.includes(".")
+  ) {
+
     text = text
       .replace(/\./g, "")
       .replace(",", ".");
+
   } else if (text.includes(",")) {
+
     text = text.replace(",", ".");
   }
 
@@ -120,8 +154,12 @@ function parseMoney(value) {
     : 0;
 }
 
+
 function parseDate(value) {
-  if (!value) return new Date();
+
+  if (!value) {
+    return new Date();
+  }
 
   const direct = new Date(value);
 
@@ -134,6 +172,7 @@ function parseDate(value) {
   );
 
   if (parts) {
+
     return new Date(
       Number(parts[3]),
       Number(parts[2]) - 1,
@@ -144,7 +183,13 @@ function parseDate(value) {
   return new Date();
 }
 
+
+/* =========================
+   TIPO
+========================= */
+
 function getType(type) {
+
   const text = String(type)
     .toLowerCase()
     .normalize("NFD")
@@ -168,10 +213,17 @@ function getType(type) {
   return "expense";
 }
 
+
+/* =========================
+   PERÍODO
+========================= */
+
 function isInPeriod(date, period) {
+
   const now = new Date();
 
   if (period === "month") {
+
     return (
       date.getMonth() === now.getMonth() &&
       date.getFullYear() === now.getFullYear()
@@ -203,29 +255,51 @@ function isInPeriod(date, period) {
     monday.getDate() + 7
   );
 
-  return date >= monday && date < nextMonday;
+  return (
+    date >= monday &&
+    date < nextMonday
+  );
 }
 
+
+/* =========================
+   RENDER
+========================= */
+
 function render() {
+
   const items = transactions
     .map(normalizeTransaction)
     .filter(item =>
-      isInPeriod(item.date, currentPeriod)
+      isInPeriod(
+        item.date,
+        currentPeriod
+      )
     )
-    .sort((a, b) => b.date - a.date);
+    .sort(
+      (a, b) =>
+        b.date - a.date
+    );
 
   let income = 0;
   let expense = 0;
   let fixed = 0;
 
   items.forEach(item => {
-    const type = getType(item.type);
+
+    const type =
+      getType(item.type);
 
     if (type === "income") {
+
       income += item.value;
+
     } else if (type === "fixed") {
+
       fixed += item.value;
+
     } else {
+
       expense += item.value;
     }
   });
@@ -240,12 +314,12 @@ function render() {
 
   setText(
     "expense",
-    "- " + money.format(expense)
+    "− " + money.format(expense)
   );
 
   setText(
     "fixed",
-    "- " + money.format(fixed)
+    "− " + money.format(fixed)
   );
 
   setText(
@@ -263,7 +337,9 @@ function render() {
   renderTransactions(items);
 }
 
+
 function setText(id, text) {
+
   const element =
     document.getElementById(id);
 
@@ -272,58 +348,76 @@ function setText(id, text) {
   }
 }
 
+
+/* =========================
+   LISTA DE MOVIMENTAÇÕES
+========================= */
+
 function renderTransactions(items) {
+
   const container =
-    document.getElementById("transactions");
+    document.getElementById(
+      "transactions"
+    );
 
   if (!container) return;
 
   if (!items.length) {
+
     container.innerHTML = `
       <div class="empty">
         Nenhuma movimentação neste período
       </div>
     `;
+
     return;
   }
 
   container.innerHTML = items
     .map(item => {
-      const type = getType(item.type);
+
+      const type =
+        getType(item.type);
 
       let cssClass = "red";
       let symbol = "−";
 
       if (type === "income") {
+
         cssClass = "green";
         symbol = "+";
       }
 
       if (type === "fixed") {
+
         cssClass = "yellow";
       }
 
+      const secondary = item.category
+        ? `${dateFormatter.format(item.date)} • ${escapeHtml(item.category)}`
+        : `${dateFormatter.format(item.date)} • ${escapeHtml(item.type)}`;
+
       return `
-        <div class="transaction">
+        <div class="tx">
 
-          <div class="transaction-info">
+          <div class="dot ${cssClass}">
+          </div>
 
-            <strong>
+          <div class="txmain">
+
+            <b>
               ${escapeHtml(item.description)}
-            </strong>
+            </b>
 
-            <span>
-              ${dateFormatter.format(item.date)}
-              •
-              ${escapeHtml(item.type)}
-            </span>
+            <small>
+              ${secondary}
+            </small>
 
           </div>
 
-          <div class="transaction-value ${cssClass}">
-            ${symbol}
-            ${money.format(item.value)}
-          </div>
+          <strong class="${cssClass}">
+            ${symbol}${money.format(item.value)}
+          </strong>
 
         </div>
       `;
@@ -331,7 +425,9 @@ function renderTransactions(items) {
     .join("");
 }
 
+
 function escapeHtml(value) {
+
   return String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -340,7 +436,10 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-/* SEMANA / MÊS */
+
+/* =========================
+   SEMANA / MÊS
+========================= */
 
 document
   .querySelectorAll("[data-period]")
@@ -352,11 +451,12 @@ document
 
         document
           .querySelectorAll("[data-period]")
-          .forEach(item =>
-            item.classList.remove("active")
-          );
+          .forEach(item => {
 
-        button.classList.add("active");
+            item.classList.remove("on");
+          });
+
+        button.classList.add("on");
 
         currentPeriod =
           button.dataset.period;
@@ -366,19 +466,382 @@ document
     );
   });
 
-/* SINCRONIZAÇÃO */
+
+/* =========================
+   MODAL
+========================= */
+
+const modal =
+  document.getElementById(
+    "transactionModal"
+  );
+
+const openModalButton =
+  document.getElementById(
+    "openTransactionModal"
+  );
+
+const closeModalButton =
+  document.getElementById(
+    "closeTransactionModal"
+  );
+
+
+function openModal() {
+
+  if (!modal) return;
+
+  modal.classList.add("open");
+
+  document.body.classList.add(
+    "modal-open"
+  );
+
+  setTimeout(() => {
+
+    document
+      .getElementById("manualValue")
+      ?.focus();
+
+  }, 250);
+}
+
+
+function closeModal() {
+
+  if (!modal) return;
+
+  modal.classList.remove("open");
+
+  document.body.classList.remove(
+    "modal-open"
+  );
+}
+
+
+openModalButton?.addEventListener(
+  "click",
+  openModal
+);
+
+
+closeModalButton?.addEventListener(
+  "click",
+  closeModal
+);
+
+
+modal?.addEventListener(
+  "click",
+  event => {
+
+    if (event.target === modal) {
+      closeModal();
+    }
+  }
+);
+
+
+/* =========================
+   ESCOLHER TIPO
+========================= */
+
+document
+  .querySelectorAll(".type-option")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        document
+          .querySelectorAll(
+            ".type-option"
+          )
+          .forEach(item => {
+
+            item.classList.remove(
+              "active"
+            );
+          });
+
+        button.classList.add(
+          "active"
+        );
+
+        manualType =
+          button.dataset.type;
+      }
+    );
+  });
+
+
+/* =========================
+   ESCOLHER CATEGORIA
+========================= */
+
+document
+  .querySelectorAll(".category")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        document
+          .querySelectorAll(
+            ".category"
+          )
+          .forEach(item => {
+
+            item.classList.remove(
+              "active"
+            );
+          });
+
+        button.classList.add(
+          "active"
+        );
+
+        manualCategory =
+          button.dataset.category;
+      }
+    );
+  });
+
+
+/* =========================
+   FORMATAR VALOR
+========================= */
+
+const manualValue =
+  document.getElementById(
+    "manualValue"
+  );
+
+
+manualValue?.addEventListener(
+  "input",
+  event => {
+
+    let digits =
+      event.target.value
+        .replace(/\D/g, "");
+
+    if (!digits) {
+
+      event.target.value = "";
+      return;
+    }
+
+    const value =
+      Number(digits) / 100;
+
+    event.target.value =
+      money.format(value);
+  }
+);
+
+
+function getManualValue() {
+
+  if (!manualValue) {
+    return 0;
+  }
+
+  const digits =
+    manualValue.value
+      .replace(/\D/g, "");
+
+  if (!digits) {
+    return 0;
+  }
+
+  return Number(digits) / 100;
+}
+
+
+/* =========================
+   SALVAR MOVIMENTAÇÃO
+========================= */
+
+const saveButton =
+  document.getElementById(
+    "saveManualTransaction"
+  );
+
+
+saveButton?.addEventListener(
+  "click",
+  async () => {
+
+    const description =
+      document
+        .getElementById(
+          "manualDescription"
+        )
+        ?.value
+        .trim() || "";
+
+    const value =
+      getManualValue();
+
+    if (value <= 0) {
+
+      alert(
+        "Digite um valor válido."
+      );
+
+      return;
+    }
+
+    if (!description) {
+
+      alert(
+        "Digite uma descrição."
+      );
+
+      return;
+    }
+
+    const originalText =
+      saveButton.textContent;
+
+    try {
+
+      saveButton.disabled = true;
+
+      saveButton.textContent =
+        "Adicionando...";
+
+      const response = await fetch(
+        API_URL,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "text/plain;charset=utf-8"
+          },
+
+          body: JSON.stringify({
+            tipo: manualType,
+            descricao: description,
+            categoria: manualCategory,
+            amount: value
+          })
+        }
+      );
+
+      if (!response.ok) {
+
+        throw new Error(
+          "Não foi possível salvar."
+        );
+      }
+
+      const result =
+        await response.json();
+
+      if (!result.success) {
+
+        throw new Error(
+          result.error ||
+          "Erro ao salvar movimentação."
+        );
+      }
+
+      closeModal();
+
+      resetManualForm();
+
+      await loadTransactions();
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Não foi possível adicionar a movimentação. Tente novamente."
+      );
+
+    } finally {
+
+      saveButton.disabled = false;
+
+      saveButton.textContent =
+        originalText;
+    }
+  }
+);
+
+
+/* =========================
+   LIMPAR FORMULÁRIO
+========================= */
+
+function resetManualForm() {
+
+  const value =
+    document.getElementById(
+      "manualValue"
+    );
+
+  const description =
+    document.getElementById(
+      "manualDescription"
+    );
+
+  if (value) {
+    value.value = "";
+  }
+
+  if (description) {
+    description.value = "";
+  }
+
+  manualType = "Gasto";
+  manualCategory = "Alimentação";
+
+  document
+    .querySelectorAll(
+      ".type-option"
+    )
+    .forEach(button => {
+
+      button.classList.toggle(
+        "active",
+        button.dataset.type === "Gasto"
+      );
+    });
+
+  document
+    .querySelectorAll(
+      ".category"
+    )
+    .forEach(button => {
+
+      button.classList.toggle(
+        "active",
+        button.dataset.category ===
+          "Alimentação"
+      );
+    });
+}
+
+
+/* =========================
+   SINCRONIZAÇÃO
+========================= */
 
 loadTransactions();
 
-/* Atualiza a cada 30 segundos */
 
 setInterval(
   loadTransactions,
   30000
 );
 
-/* Atualiza imediatamente
-   quando voltar ao app */
 
 document.addEventListener(
   "visibilitychange",
@@ -388,6 +851,7 @@ document.addEventListener(
       document.visibilityState ===
       "visible"
     ) {
+
       loadTransactions();
     }
   }
