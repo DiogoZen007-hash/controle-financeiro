@@ -759,7 +759,174 @@ header{
 .save-transaction:disabled{
   opacity:.55;
 }
+/* HISTÓRICO / CALENDÁRIO */
 
+.calendar{
+  cursor:pointer;
+  color:#fff;
+}
+
+.month-backdrop{
+  position:fixed;
+  inset:0;
+
+  background:#000b;
+
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+
+  opacity:0;
+  pointer-events:none;
+
+  transition:opacity .2s ease;
+
+  z-index:60;
+}
+
+.month-backdrop.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.month-modal{
+  width:min(520px,100%);
+
+  background:
+    radial-gradient(
+      circle at 50% 0,
+      #1a252d,
+      transparent 40%
+    ),
+    #0c1115;
+
+  border:1px solid #2c343a;
+  border-bottom:0;
+
+  border-radius:30px 30px 0 0;
+
+  padding:
+    12px
+    22px
+    calc(env(safe-area-inset-bottom) + 28px);
+
+  transform:translateY(30px);
+
+  transition:transform .25s ease;
+
+  box-shadow:
+    0 -20px 60px #000c;
+}
+
+.month-backdrop.open .month-modal{
+  transform:translateY(0);
+}
+
+.month-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  margin-bottom:28px;
+}
+
+.month-header small{
+  color:#7f878d;
+  font-size:13px;
+  font-weight:700;
+}
+
+.month-header h2{
+  margin:3px 0 0;
+
+  font-size:25px;
+
+  letter-spacing:-.7px;
+}
+
+.month-navigation{
+  display:grid;
+
+  grid-template-columns:
+    52px 1fr 52px;
+
+  align-items:center;
+
+  gap:10px;
+
+  margin-bottom:16px;
+}
+
+.month-navigation button{
+  width:52px;
+  height:52px;
+
+  border:1px solid #30383e;
+
+  border-radius:16px;
+
+  background:#151b20;
+
+  color:#fff;
+
+  font-size:31px;
+
+  cursor:pointer;
+}
+
+.selected-month{
+  min-height:66px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  text-align:center;
+
+  border:1px solid #30383e;
+
+  border-radius:18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #1c242a,
+      #11161a
+    );
+
+  font-size:20px;
+  font-weight:800;
+
+  letter-spacing:-.4px;
+}
+
+.current-month-button{
+  width:100%;
+
+  border:1px solid #30383e;
+
+  border-radius:16px;
+
+  padding:15px;
+
+  background:#151b20;
+
+  color:#fff;
+
+  font-size:15px;
+
+  font-weight:750;
+
+  cursor:pointer;
+}
+
+.current-month-button:active,
+.month-navigation button:active{
+  transform:scale(.97);
+}
 /* MOBILE */
 
 @media(max-width:390px){
@@ -822,7 +989,13 @@ header{
 
 </div>
 
-<div class="calendar">▣</div>
+<button
+  class="calendar"
+  id="openCalendar"
+  aria-label="Escolher mês"
+>
+  ▣
+</button>
 
 </header>
 
@@ -947,7 +1120,58 @@ Conectando ao Google Sheets…
 
 </main>
 
+<!-- SELETOR DE MÊS -->
 
+<div
+  class="month-backdrop"
+  id="monthModal"
+>
+  <div class="month-modal">
+
+    <div class="modal-handle"></div>
+
+    <div class="month-header">
+      <div>
+        <small>Histórico</small>
+        <h2>Escolher período</h2>
+      </div>
+
+      <button
+        class="close-modal"
+        id="closeCalendar"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="month-navigation">
+
+      <button id="previousMonth">
+        ‹
+      </button>
+
+      <div
+        class="selected-month"
+        id="selectedMonth"
+      >
+        Outubro 2026
+      </div>
+
+      <button id="nextMonth">
+        ›
+      </button>
+
+    </div>
+
+    <button
+      class="current-month-button"
+      id="currentMonthButton"
+    >
+      Voltar para o mês atual
+    </button>
+
+  </div>
+</div>
 <!-- BOTÃO FLUTUANTE -->
 
 <button
