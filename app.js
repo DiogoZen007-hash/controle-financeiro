@@ -1682,6 +1682,235 @@ if (expensesContainer) {
   }
 }
 
+  const chart =
+  document.getElementById(
+    "expensesChart"
+  );
+
+if (chart) {
+
+  if (!expenseItems.length) {
+
+    chart.innerHTML = `
+      <div class="expenses-chart-placeholder">
+        Sem dados suficientes
+      </div>
+    `;
+
+    setText(
+      "expensesChartChange",
+      "0%"
+    );
+
+  } else {
+
+    const ordered =
+      [...expenseItems]
+        .sort(
+          (a, b) =>
+            a.date - b.date
+        );
+
+    let cumulative = 0;
+
+    const points =
+      ordered.map(item => {
+
+        cumulative +=
+          item.value;
+
+        return {
+          date: item.date,
+          value: cumulative
+        };
+      });
+
+
+    const maxValue =
+      Math.max(
+        ...points.map(
+          point =>
+            point.value
+        ),
+        1
+      );
+
+
+    const width = 600;
+    const height = 220;
+
+    const paddingX = 18;
+    const paddingY = 22;
+
+    const usableWidth =
+      width -
+      paddingX * 2;
+
+    const usableHeight =
+      height -
+      paddingY * 2;
+
+
+    const svgPoints =
+      points.map(
+        (point, index) => {
+
+          const x =
+            points.length === 1
+              ? width / 2
+              : paddingX +
+                (
+                  index /
+                  (
+                    points.length -
+                    1
+                  )
+                ) *
+                usableWidth;
+
+          const y =
+            height -
+            paddingY -
+            (
+              point.value /
+              maxValue
+            ) *
+            usableHeight;
+
+          return {
+            x,
+            y
+          };
+        }
+      );
+
+
+    const linePoints =
+      svgPoints
+        .map(
+          point =>
+            `${point.x},${point.y}`
+        )
+        .join(" ");
+
+
+    const areaPoints =
+      [
+        `${svgPoints[0].x},${height}`,
+        ...svgPoints.map(
+          point =>
+            `${point.x},${point.y}`
+        ),
+        `${svgPoints[
+          svgPoints.length - 1
+        ].x},${height}`
+      ]
+        .join(" ");
+
+
+    chart.innerHTML = `
+      <svg
+        viewBox="0 0 ${width} ${height}"
+        width="100%"
+        height="100%"
+        preserveAspectRatio="none"
+      >
+
+        <defs>
+
+          <linearGradient
+            id="expenseAreaGradient"
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="1"
+          >
+
+            <stop
+              offset="0%"
+              stop-color="#ff4f59"
+              stop-opacity=".35"
+            />
+
+            <stop
+              offset="100%"
+              stop-color="#ff4f59"
+              stop-opacity="0"
+            />
+
+          </linearGradient>
+
+        </defs>
+
+
+        <polygon
+          points="${areaPoints}"
+          fill="url(#expenseAreaGradient)"
+        />
+
+
+        <polyline
+          points="${linePoints}"
+          fill="none"
+          stroke="#ff4f59"
+          stroke-width="5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+
+
+        ${svgPoints
+          .map(
+            point => `
+              <circle
+                cx="${point.x}"
+                cy="${point.y}"
+                r="6"
+                fill="#ff4f59"
+              />
+            `
+          )
+          .join("")}
+
+      </svg>
+    `;
+
+
+    const firstValue =
+      ordered[0]?.value || 0;
+
+    const lastValue =
+      ordered[
+        ordered.length - 1
+      ]?.value || 0;
+
+
+    if (firstValue > 0) {
+
+      const change =
+        (
+          (
+            lastValue -
+            firstValue
+          ) /
+          firstValue
+        ) * 100;
+
+      setText(
+        "expensesChartChange",
+        `+${Math.round(change)}%`
+      );
+
+    } else {
+
+      setText(
+        "expensesChartChange",
+        "0%"
+      );
+    }
+  }
+}
+  
   page.classList.add(
     "open"
   );
