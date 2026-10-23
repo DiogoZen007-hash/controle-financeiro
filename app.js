@@ -90,7 +90,6 @@ fixedExpenses =
 
 render();
 renderFixedExpenses();
-renderExpensesPage();
     
     if (sync) {
       sync.textContent =
