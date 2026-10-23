@@ -1861,7 +1861,107 @@ header{
   font-weight:700;
 }
 
+  .single-expense-chart{
+  height:100%;
 
+  display:flex;
+  flex-direction:column;
+
+  align-items:center;
+  justify-content:center;
+
+  gap:16px;
+}
+
+.single-expense-value{
+  color:var(--red);
+
+  font-size:28px;
+  font-weight:850;
+
+  letter-spacing:-.8px;
+}
+
+.single-expense-bar{
+  width:70%;
+  max-width:250px;
+
+  height:12px;
+
+  border-radius:20px;
+
+  background:#241316;
+
+  overflow:hidden;
+}
+
+.single-expense-bar-fill{
+  width:100%;
+  height:100%;
+
+  border-radius:20px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #b72f39,
+      #ff4f59
+    );
+
+  box-shadow:
+    0 0 18px #ff4f5966;
+}
+
+.single-expense-date{
+  color:#777f85;
+
+  font-size:13px;
+  font-weight:700;
+}
+
+
+.expense-chart-tooltip{
+  position:absolute;
+
+  left:50%;
+  top:15px;
+
+  transform:
+    translateX(-50%)
+    translateY(-5px);
+
+  padding:
+    8px 12px;
+
+  border:
+    1px solid #343b40;
+
+  border-radius:12px;
+
+  background:#151b20ee;
+
+  color:#fff;
+
+  font-size:12px;
+  font-weight:750;
+
+  opacity:0;
+
+  pointer-events:none;
+
+  transition:
+    opacity .15s ease,
+    transform .15s ease;
+}
+
+.expense-chart-tooltip.show{
+  opacity:1;
+
+  transform:
+    translateX(-50%)
+    translateY(0);
+}
+  
 /* GASTOS X ENTRADAS */
 
 .expenses-comparison{
