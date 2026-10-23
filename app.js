@@ -91,8 +91,6 @@ fixedExpenses =
 render();
 renderFixedExpenses();
 
-    render();
-
     if (sync) {
       sync.textContent =
         "✓ Sincronizado";
@@ -2345,34 +2343,6 @@ nextMonth?.addEventListener(
   }
 );
 
-showWholeMonth
-  ?.addEventListener(
-    "click",
-    () => {
-
-      selectedDay = null;
-
-      currentPeriod =
-        "month";
-
-      document
-        .querySelectorAll(
-          "[data-period]"
-        )
-        .forEach(button => {
-
-          button.classList.toggle(
-            "on",
-            button.dataset.period ===
-              "month"
-          );
-        });
-
-      render();
-
-      closeMonthModal();
-    }
-  );
 showWholeMonth
   ?.addEventListener(
     "click",
