@@ -1607,6 +1607,388 @@ header{
 
   color:#747c82;
 }
+/* ========================================
+   TELA DE GASTOS
+======================================== */
+
+.expenses-page-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:75;
+
+  background:#070a0d;
+
+  opacity:0;
+  pointer-events:none;
+
+  transition:opacity .2s ease;
+
+  overflow:auto;
+}
+
+.expenses-page-backdrop.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.expenses-page{
+  width:min(520px,100%);
+  min-height:100vh;
+
+  margin:auto;
+
+  padding:
+    calc(env(safe-area-inset-top) + 24px)
+    22px
+    calc(env(safe-area-inset-bottom) + 120px);
+}
+
+
+/* CABEÇALHO */
+
+.expenses-page-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  margin-bottom:25px;
+}
+
+.expenses-page-header small{
+  display:block;
+
+  color:#858d93;
+
+  margin-bottom:4px;
+
+  font-weight:700;
+}
+
+.expenses-page-header h2{
+  margin:0;
+
+  font-size:29px;
+
+  letter-spacing:-.9px;
+}
+
+.expenses-close{
+  width:44px;
+  height:44px;
+
+  border:1px solid #293138;
+
+  border-radius:50%;
+
+  background:#151b20;
+
+  color:#fff;
+
+  font-size:24px;
+
+  cursor:pointer;
+}
+
+
+/* TOTAL */
+
+.expenses-total-card{
+  position:relative;
+
+  overflow:hidden;
+
+  border:1px solid #4b282c;
+
+  border-radius:26px;
+
+  padding:24px;
+
+  margin-bottom:18px;
+
+  background:
+    radial-gradient(
+      circle at 10% 50%,
+      #63151c99,
+      transparent 55%
+    ),
+    linear-gradient(
+      120deg,
+      #291519,
+      #161719
+    );
+
+  box-shadow:
+    0 18px 50px #0008;
+}
+
+.expenses-total-card:before{
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  top:0;
+  bottom:0;
+
+  width:7px;
+
+  background:var(--red);
+
+  box-shadow:
+    0 0 22px var(--red);
+}
+
+.expenses-total-label{
+  color:#b4a2a4;
+
+  font-size:14px;
+
+  font-weight:700;
+}
+
+.expenses-total-value{
+  color:var(--red);
+
+  font-size:42px;
+
+  font-weight:850;
+
+  letter-spacing:-1.5px;
+
+  margin-top:8px;
+}
+
+.expenses-total-period{
+  color:#8b9297;
+
+  margin-top:5px;
+
+  font-size:13px;
+}
+
+
+/* GRÁFICO */
+
+.expenses-chart-card{
+  border:1px solid #252d32;
+
+  border-radius:25px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #12181c,
+      #0c1013
+    );
+
+  padding:20px;
+
+  margin-bottom:18px;
+
+  box-shadow:
+    0 14px 45px #0006;
+}
+
+.expenses-section-header{
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:flex-start;
+
+  margin-bottom:18px;
+}
+
+.expenses-section-header small{
+  color:#7e868c;
+
+  font-size:12px;
+
+  font-weight:700;
+}
+
+.expenses-section-header h3{
+  margin:3px 0 0;
+
+  font-size:19px;
+}
+
+#expensesChartChange{
+  color:var(--red);
+
+  font-size:14px;
+
+  font-weight:800;
+}
+
+.expenses-chart{
+  position:relative;
+
+  height:250px;
+
+  border-radius:18px;
+
+  overflow:hidden;
+
+  background:
+    linear-gradient(
+      #ffffff08 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      #ffffff08 1px,
+      transparent 1px
+    ),
+    #0b1013;
+
+  background-size:
+    100% 50px,
+    65px 100%;
+}
+
+.expenses-chart-placeholder{
+  height:100%;
+
+  display:grid;
+
+  place-items:center;
+
+  color:#4f585f;
+
+  font-size:13px;
+
+  font-weight:700;
+}
+
+
+/* GASTOS X ENTRADAS */
+
+.expenses-comparison{
+  border:1px solid #252d32;
+
+  border-radius:24px;
+
+  padding:21px;
+
+  margin-bottom:22px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #141a1e,
+      #0e1215
+    );
+}
+
+.comparison-label{
+  color:#81898f;
+
+  font-size:12px;
+
+  font-weight:750;
+
+  text-transform:uppercase;
+}
+
+.comparison-status{
+  margin-top:7px;
+
+  font-size:21px;
+
+  font-weight:850;
+
+  letter-spacing:-.4px;
+}
+
+.comparison-description{
+  color:#90979c;
+
+  margin-top:5px;
+
+  line-height:1.4;
+
+  font-size:14px;
+}
+
+.comparison-values{
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:12px;
+
+  margin-top:18px;
+
+  padding-top:17px;
+
+  border-top:
+    1px solid #252c32;
+}
+
+.comparison-values > div{
+  display:flex;
+
+  flex-direction:column;
+
+  gap:5px;
+}
+
+.comparison-values small{
+  color:#7f878d;
+
+  font-size:12px;
+
+  font-weight:700;
+}
+
+.comparison-values strong{
+  font-size:18px;
+}
+
+
+/* MOVIMENTAÇÕES */
+
+.expenses-list-header{
+  display:flex;
+
+  align-items:end;
+
+  justify-content:space-between;
+
+  margin:
+    28px 2px 8px;
+}
+
+.expenses-list-header h3{
+  margin:0;
+
+  font-size:20px;
+}
+
+.expenses-list-header span{
+  color:#7f878d;
+
+  font-size:12px;
+}
+
+.expenses-transactions{
+  margin-bottom:20px;
+}
+
+.expenses-empty{
+  text-align:center;
+
+  color:#747c82;
+
+  padding:35px 10px;
+}
+
+
+.expenses-close:active{
+  transform:scale(.94);
+}
   /* MOBILE */
 
 @media(max-width:390px){
@@ -2278,7 +2660,186 @@ Excluir movimentação
   </div>
 
 </div>
-<script src="app.js"></script>
+<!-- ======================================
+     TELA DE GASTOS
+======================================= -->
+
+<div
+  class="expenses-page-backdrop"
+  id="expensesPage"
+>
+
+  <div class="expenses-page">
+
+
+    <!-- CABEÇALHO -->
+
+    <div class="expenses-page-header">
+
+      <div>
+        <small>My Finance</small>
+        <h2>Gastos</h2>
+      </div>
+
+      <button
+        class="expenses-close"
+        id="closeExpenses"
+        aria-label="Fechar"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!-- TOTAL -->
+
+    <div class="expenses-total-card">
+
+      <div class="expenses-total-label">
+        Total gasto
+      </div>
+
+      <div
+        class="expenses-total-value"
+        id="expensesTotal"
+      >
+        − R$ 0,00
+      </div>
+
+      <div
+        class="expenses-total-period"
+        id="expensesTotalPeriod"
+      >
+        Este mês
+      </div>
+
+    </div>
+
+
+    <!-- GRÁFICO -->
+
+    <section class="expenses-chart-card">
+
+      <div class="expenses-section-header">
+
+        <div>
+          <small>Evolução</small>
+          <h3>Gastos no período</h3>
+        </div>
+
+        <span id="expensesChartChange">
+          0%
+        </span>
+
+      </div>
+
+
+      <div
+        class="expenses-chart"
+        id="expensesChart"
+      >
+
+        <div class="expenses-chart-placeholder">
+          Gráfico
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- COMPARAÇÃO GASTOS X ENTRADAS -->
+
+    <section
+      class="expenses-comparison"
+      id="expensesComparison"
+    >
+
+      <div class="comparison-label">
+        Balanço do período
+      </div>
+
+      <div
+        class="comparison-status"
+        id="expensesComparisonStatus"
+      >
+        Equilibrado
+      </div>
+
+      <div
+        class="comparison-description"
+        id="expensesComparisonDescription"
+      >
+        Seus gastos e entradas estão equilibrados.
+      </div>
+
+
+      <div class="comparison-values">
+
+        <div>
+
+          <small>Entradas</small>
+
+          <strong
+            class="green"
+            id="expensesIncomeValue"
+          >
+            R$ 0,00
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <small>Gastos</small>
+
+          <strong
+            class="red"
+            id="expensesSpentValue"
+          >
+            R$ 0,00
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- MOVIMENTAÇÕES -->
+
+    <div class="expenses-list-header">
+
+      <h3>
+        Movimentações
+      </h3>
+
+      <span id="expensesTransactionCount">
+        0 registros
+      </span>
+
+    </div>
+
+
+    <div
+      class="expenses-transactions"
+      id="expensesTransactions"
+    >
+
+      <div class="expenses-empty">
+        Nenhum gasto neste período.
+      </div>
+
+    </div>
+
+
+  </div>
+
+</div>
+  <script src="app.js"></script>
 
 </body>
 </html>
