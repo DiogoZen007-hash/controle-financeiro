@@ -1435,6 +1435,35 @@ function renderFixedExpenses() {
 
 function showExpensesPage() {
 
+  const items =
+  transactions
+    .map(normalizeTransaction)
+    .filter(item =>
+      isInPeriod(
+        item.date,
+        currentPeriod
+      )
+    );
+
+const expenseTotal =
+  items
+    .filter(
+      item =>
+        getType(item.type) ===
+          "expense"
+    )
+    .reduce(
+      (total, item) =>
+        total + item.value,
+      0
+    );
+
+setText(
+  "expensesTotal",
+  "− " + money.format(
+    expenseTotal
+  )
+);
   expensesPage?.classList.add(
     "open"
   );
