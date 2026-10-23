@@ -1577,6 +1577,110 @@ function showExpensesPage() {
     }
   }
 
+  const expenseItems =
+  items
+    .filter(
+      item =>
+        getType(item.type) ===
+        "expense"
+    )
+    .sort(
+      (a, b) =>
+        b.date - a.date
+    );
+
+
+setText(
+  "expensesTransactionCount",
+  expenseItems.length === 1
+    ? "1 registro"
+    : `${expenseItems.length} registros`
+);
+
+
+const expensesContainer =
+  document.getElementById(
+    "expensesTransactions"
+  );
+
+
+if (expensesContainer) {
+
+  if (!expenseItems.length) {
+
+    expensesContainer.innerHTML = `
+      <div class="expenses-empty">
+        Nenhum gasto neste período.
+      </div>
+    `;
+
+  } else {
+
+    expensesContainer.innerHTML =
+      expenseItems
+        .map(item => {
+
+          const secondary =
+            item.category
+              ? `${dateFormatter.format(item.date)} • ${escapeHtml(item.category)}`
+              : dateFormatter.format(item.date);
+
+          return `
+            <div
+              class="tx expense-page-tx"
+              data-row="${item.row}"
+              role="button"
+              tabindex="0"
+              style="cursor:pointer"
+            >
+
+              <div class="dot red"></div>
+
+              <div class="txmain">
+
+                <b>
+                  ${escapeHtml(item.description)}
+                </b>
+
+                <small>
+                  ${secondary}
+                </small>
+
+              </div>
+
+              <strong class="red">
+                −${money.format(item.value)}
+              </strong>
+
+            </div>
+          `;
+        })
+        .join("");
+
+
+    expensesContainer
+      .querySelectorAll(
+        ".expense-page-tx"
+      )
+      .forEach(element => {
+
+        element.addEventListener(
+          "click",
+          () => {
+
+            const row =
+              Number(
+                element.dataset.row
+              );
+
+            hideExpensesPage();
+
+            openEditModal(row);
+          }
+        );
+      });
+  }
+}
 
   page.classList.add(
     "open"
