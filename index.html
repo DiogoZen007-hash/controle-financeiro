@@ -450,7 +450,213 @@ header{
 .add-button:active{
   transform:scale(.92);
 }
+/* ========================================
+   BARRA DE NAVEGAÇÃO INFERIOR
+======================================== */
 
+.bottom-nav{
+  position:fixed;
+
+  left:50%;
+  transform:translateX(-50%);
+
+  bottom:
+    calc(
+      env(safe-area-inset-bottom) + 12px
+    );
+
+  width:
+    min(
+      calc(100% - 28px),
+      492px
+    );
+
+  height:78px;
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr 82px 1fr 1fr;
+
+  align-items:center;
+
+  padding:
+    8px 10px;
+
+  border:
+    1px solid #2b3238;
+
+  border-radius:26px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #171d21ee,
+      #0d1114f2
+    );
+
+  backdrop-filter:
+    blur(20px);
+
+  -webkit-backdrop-filter:
+    blur(20px);
+
+  box-shadow:
+    0 18px 50px #000c,
+    inset 0 1px 0 #ffffff12;
+
+  z-index:40;
+}
+
+
+/* BOTÕES NORMAIS */
+
+.nav-item{
+  border:0;
+
+  background:transparent;
+
+  color:#747d84;
+
+  height:58px;
+
+  border-radius:18px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+  justify-content:center;
+
+  gap:4px;
+
+  padding:0;
+
+  font-family:inherit;
+
+  font-size:10px;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+  transition:
+    transform .15s ease,
+    color .15s ease,
+    background .15s ease;
+}
+
+
+.nav-icon{
+  font-size:23px;
+
+  line-height:1;
+
+  font-weight:500;
+}
+
+
+.nav-item.active{
+  color:#fff;
+
+  background:
+    linear-gradient(
+      145deg,
+      #20272c,
+      #151a1e
+    );
+}
+
+
+.nav-item:active{
+  transform:scale(.91);
+}
+
+
+/* BOTÃO CENTRAL + */
+
+.nav-add{
+  width:66px;
+  height:66px;
+
+  justify-self:center;
+
+  border:
+    1px solid #4bea9a;
+
+  border-radius:50%;
+
+  background:
+    linear-gradient(
+      145deg,
+      #41e895,
+      #20b96c
+    );
+
+  color:#fff;
+
+  font-size:42px;
+  font-weight:300;
+
+  line-height:1;
+
+  padding:0 0 5px;
+
+  display:grid;
+
+  place-items:center;
+
+  cursor:pointer;
+
+  box-shadow:
+    0 10px 30px #20d67b55,
+    inset 0 1px 0 #ffffff55;
+
+  transform:
+    translateY(-14px);
+
+  transition:
+    transform .15s ease;
+}
+
+
+.nav-add:active{
+  transform:
+    translateY(-14px)
+    scale(.91);
+}
+
+
+/* iPHONE MENOR */
+
+@media(max-width:390px){
+
+  .bottom-nav{
+    width:
+      calc(100% - 20px);
+
+    grid-template-columns:
+      1fr 1fr 74px 1fr 1fr;
+
+    padding:
+      8px 5px;
+  }
+
+  .nav-item{
+    font-size:9px;
+  }
+
+  .nav-icon{
+    font-size:21px;
+  }
+
+  .nav-add{
+    width:62px;
+    height:62px;
+  }
+
+}
 /* FUNDO DO MODAL */
 
 .modal-backdrop{
@@ -1674,16 +1880,55 @@ Conectando ao Google Sheets…
 
   </div>
 </div>
-<!-- BOTÃO FLUTUANTE -->
+<!-- BARRA DE NAVEGAÇÃO -->
 
-<button
-  class="add-button"
-  id="openTransactionModal"
-  aria-label="Adicionar movimentação"
->
-+
-</button>
+<nav class="bottom-nav">
 
+  <button
+    class="nav-item active"
+    id="navHome"
+    aria-label="Início"
+  >
+    <span class="nav-icon">⌂</span>
+    <span>Início</span>
+  </button>
+
+  <button
+    class="nav-item"
+    id="navTransactions"
+    aria-label="Movimentações"
+  >
+    <span class="nav-icon">☷</span>
+    <span>Movimentações</span>
+  </button>
+
+  <button
+    class="nav-add"
+    id="openTransactionModal"
+    aria-label="Adicionar movimentação"
+  >
+    +
+  </button>
+
+  <button
+    class="nav-item"
+    id="navAnalytics"
+    aria-label="Análises"
+  >
+    <span class="nav-icon">▥</span>
+    <span>Análises</span>
+  </button>
+
+  <button
+    class="nav-item"
+    id="navMore"
+    aria-label="Mais"
+  >
+    <span class="nav-icon">•••</span>
+    <span>Mais</span>
+  </button>
+
+</nav>
 
 <!-- MODAL -->
 
