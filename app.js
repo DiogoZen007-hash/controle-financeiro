@@ -1689,143 +1689,162 @@ if (expensesContainer) {
 
 if (chart) {
 
-  if (!expenseItems.length) {
+  const chartItems =
+    [...items]
+      .filter(item => {
+
+        const type =
+          getType(item.type);
+
+        return (
+          type === "expense" ||
+          type === "income"
+        );
+      })
+      .sort(
+        (a, b) =>
+          a.date - b.date
+      );
+
+
+  if (!chartItems.length) {
 
     chart.innerHTML = `
       <div class="expenses-chart-placeholder">
-        Sem dados suficientes
+        Sem movimentações neste período
       </div>
     `;
 
     setText(
       "expensesChartChange",
-      "0 gastos"
+      "0 registros"
     );
 
   } else {
 
-    const ordered =
-      [...expenseItems]
+    const dailyData = {};
+
+
+    chartItems.forEach(item => {
+
+      const key =
+        `${item.date.getFullYear()}-${item.date.getMonth()}-${item.date.getDate()}`;
+
+      if (!dailyData[key]) {
+
+        dailyData[key] = {
+          date: item.date,
+          expense: 0,
+          income: 0
+        };
+      }
+
+
+      const type =
+        getType(item.type);
+
+
+      if (type === "expense") {
+
+        dailyData[key].expense +=
+          item.value;
+
+      } else if (
+        type === "income"
+      ) {
+
+        dailyData[key].income +=
+          item.value;
+      }
+    });
+
+
+    const days =
+      Object.values(
+        dailyData
+      )
         .sort(
           (a, b) =>
             a.date - b.date
         );
 
-    setText(
-      "expensesChartChange",
-      ordered.length === 1
-        ? "1 gasto"
-        : `${ordered.length} gastos`
-    );
+
+    let cumulativeExpense = 0;
+    let cumulativeIncome = 0;
 
 
-    /* =========================
-       APENAS 1 GASTO
-    ========================= */
+    const points =
+      days.map(day => {
 
-    if (ordered.length === 1) {
+        cumulativeExpense +=
+          day.expense;
 
-      const item =
-        ordered[0];
+        cumulativeIncome +=
+          day.income;
 
-      chart.innerHTML = `
-        <div class="single-expense-chart">
-
-          <div class="single-expense-value">
-            ${money.format(
-              item.value
-            )}
-          </div>
-
-          <div class="single-expense-bar">
-            <div
-              class="single-expense-bar-fill"
-            ></div>
-          </div>
-
-          <div class="single-expense-date">
-            ${dateFormatter.format(
-              item.date
-            )}
-          </div>
-
-        </div>
-      `;
-
-    } else {
-
-      /* =========================
-         2 OU MAIS GASTOS
-      ========================= */
-
-      let cumulative = 0;
-
-      const points =
-        ordered.map(item => {
-
-          cumulative +=
-            item.value;
-
-          return {
-            date:
-              item.date,
-
-            value:
-              cumulative,
-
-            originalValue:
-              item.value
-          };
-        });
+        return {
+          date: day.date,
+          expense: cumulativeExpense,
+          income: cumulativeIncome
+        };
+      });
 
 
-      const maxValue =
-        Math.max(
-          ...points.map(
-            point =>
-              point.value
-          ),
-          1
-        );
+    const maxValue =
+      Math.max(
+        ...points.map(
+          point =>
+            Math.max(
+              point.expense,
+              point.income
+            )
+        ),
+        1
+      );
 
 
-      const width = 600;
-      const height = 220;
+    const width = 600;
+    const height = 220;
 
-      const paddingX = 26;
-      const paddingTop = 22;
-      const paddingBottom = 36;
+    const paddingX = 28;
+    const paddingTop = 30;
+    const paddingBottom = 38;
 
-      const usableWidth =
-        width -
-        paddingX * 2;
+    const usableWidth =
+      width -
+      paddingX * 2;
 
-      const usableHeight =
-        height -
-        paddingTop -
-        paddingBottom;
+    const usableHeight =
+      height -
+      paddingTop -
+      paddingBottom;
 
 
-      const svgPoints =
+    const makePoints =
+      type =>
         points.map(
           (point, index) => {
 
             const x =
-              paddingX +
-              (
-                index /
-                (
-                  points.length -
-                  1
-                )
-              ) *
-              usableWidth;
+              points.length === 1
+                ? width / 2
+                : paddingX +
+                  (
+                    index /
+                    (
+                      points.length - 1
+                    )
+                  ) *
+                  usableWidth;
+
+            const value =
+              point[type];
 
             const y =
               paddingTop +
               (
                 1 -
-                point.value /
+                value /
                 maxValue
               ) *
               usableHeight;
@@ -1839,274 +1858,19 @@ if (chart) {
         );
 
 
-      const linePoints =
-        svgPoints
-          .map(
-            point =>
-              `${point.x},${point.y}`
-          )
-          .join(" ");
+    const expensePoints =
+      makePoints(
+        "expense"
+      );
 
-
-      const areaPoints =
-        [
-          `${svgPoints[0].x},${height - paddingBottom}`,
-
-          ...svgPoints.map(
-            point =>
-              `${point.x},${point.y}`
-          ),
-
-          `${svgPoints[
-            svgPoints.length - 1
-          ].x},${height - paddingBottom}`
-        ]
-          .join(" ");
-
-
-      chart.innerHTML = `
-        <svg
-          viewBox="0 0 ${width} ${height}"
-          width="100%"
-          height="100%"
-          preserveAspectRatio="none"
-        >
-
-          <defs>
-
-            <linearGradient
-              id="expenseAreaGradient"
-              x1="0"
-              y1="0"
-              x2="0"
-              y2="1"
-            >
-
-              <stop
-                offset="0%"
-                stop-color="#ff4f59"
-                stop-opacity=".38"
-              />
-
-              <stop
-                offset="100%"
-                stop-color="#ff4f59"
-                stop-opacity="0"
-              />
-
-            </linearGradient>
-
-          </defs>
-
-
-          <polygon
-            points="${areaPoints}"
-            fill="url(#expenseAreaGradient)"
-          />
-
-
-          <polyline
-            points="${linePoints}"
-            fill="none"
-            stroke="#ff4f59"
-            stroke-width="5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-
-
-          ${svgPoints
-            .map(
-              point => `
-                <circle
-                  class="expense-chart-point"
-                  cx="${point.x}"
-                  cy="${point.y}"
-                  r="7"
-                  fill="#ff4f59"
-                  data-value="${money.format(
-                    point.originalValue
-                  )}"
-                  data-date="${dateFormatter.format(
-                    point.date
-                  )}"
-                />
-              `
-            )
-            .join("")}
-
-
-          ${svgPoints
-            .map(
-              point => `
-                <text
-                  x="${point.x}"
-                  y="${height - 12}"
-                  fill="#70787e"
-                  font-size="16"
-                  text-anchor="middle"
-                >
-                  ${dateFormatter.format(
-                    point.date
-                  )}
-                </text>
-              `
-            )
-            .join("")}
-
-        </svg>
-
-        <div
-          class="expense-chart-tooltip"
-          id="expenseChartTooltip"
-        ></div>
-      `;
-
-
-      const tooltip =
-        document.getElementById(
-          "expenseChartTooltip"
-        );
-
-
-      chart
-        .querySelectorAll(
-          ".expense-chart-point"
-        )
-        .forEach(point => {
-
-          point.addEventListener(
-            "click",
-            () => {
-
-              if (!tooltip) {
-                return;
-              }
-
-              tooltip.textContent =
-                `${point.dataset.date} • ${point.dataset.value}`;
-
-              tooltip.classList.add(
-                "show"
-              );
-
-              setTimeout(
-                () => {
-
-                  tooltip.classList.remove(
-                    "show"
-                  );
-
-                },
-                1800
-              );
-            }
-          );
-        });
-    }
-  }
-}
-
-if (chart) {
-
-  if (!expenseItems.length) {
-
-    chart.innerHTML = `
-      <div class="expenses-chart-placeholder">
-        Sem dados suficientes
-      </div>
-    `;
-
-    setText(
-      "expensesChartChange",
-      "0%"
-    );
-
-  } else {
-
-    const ordered =
-      [...expenseItems]
-        .sort(
-          (a, b) =>
-            a.date - b.date
-        );
-
-    let cumulative = 0;
-
-    const points =
-      ordered.map(item => {
-
-        cumulative +=
-          item.value;
-
-        return {
-          date: item.date,
-          value: cumulative
-        };
-      });
-
-
-    const maxValue =
-      Math.max(
-        ...points.map(
-          point =>
-            point.value
-        ),
-        1
+    const incomePoints =
+      makePoints(
+        "income"
       );
 
 
-    const width = 600;
-    const height = 220;
-
-    const paddingX = 18;
-    const paddingY = 22;
-
-    const usableWidth =
-      width -
-      paddingX * 2;
-
-    const usableHeight =
-      height -
-      paddingY * 2;
-
-
-    const svgPoints =
-      points.map(
-        (point, index) => {
-
-          const x =
-            points.length === 1
-              ? width / 2
-              : paddingX +
-                (
-                  index /
-                  (
-                    points.length -
-                    1
-                  )
-                ) *
-                usableWidth;
-
-          const y =
-            height -
-            paddingY -
-            (
-              point.value /
-              maxValue
-            ) *
-            usableHeight;
-
-          return {
-            x,
-            y
-          };
-        }
-      );
-
-
-    const linePoints =
-      svgPoints
+    const expenseLine =
+      expensePoints
         .map(
           point =>
             `${point.x},${point.y}`
@@ -2114,21 +1878,32 @@ if (chart) {
         .join(" ");
 
 
-    const areaPoints =
-      [
-        `${svgPoints[0].x},${height}`,
-        ...svgPoints.map(
+    const incomeLine =
+      incomePoints
+        .map(
           point =>
             `${point.x},${point.y}`
-        ),
-        `${svgPoints[
-          svgPoints.length - 1
-        ].x},${height}`
-      ]
+        )
         .join(" ");
 
 
     chart.innerHTML = `
+
+      <div class="chart-legend">
+
+        <span>
+          <i class="legend-dot income-dot"></i>
+          Entradas
+        </span>
+
+        <span>
+          <i class="legend-dot expense-dot"></i>
+          Gastos
+        </span>
+
+      </div>
+
+
       <svg
         viewBox="0 0 ${width} ${height}"
         width="100%"
@@ -2136,41 +1911,18 @@ if (chart) {
         preserveAspectRatio="none"
       >
 
-        <defs>
-
-          <linearGradient
-            id="expenseAreaGradient"
-            x1="0"
-            y1="0"
-            x2="0"
-            y2="1"
-          >
-
-            <stop
-              offset="0%"
-              stop-color="#ff4f59"
-              stop-opacity=".35"
-            />
-
-            <stop
-              offset="100%"
-              stop-color="#ff4f59"
-              stop-opacity="0"
-            />
-
-          </linearGradient>
-
-        </defs>
-
-
-        <polygon
-          points="${areaPoints}"
-          fill="url(#expenseAreaGradient)"
+        <polyline
+          points="${incomeLine}"
+          fill="none"
+          stroke="#2ee58a"
+          stroke-width="5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
         />
 
 
         <polyline
-          points="${linePoints}"
+          points="${expenseLine}"
           fill="none"
           stroke="#ff4f59"
           stroke-width="5"
@@ -2179,16 +1931,64 @@ if (chart) {
         />
 
 
-        ${svgPoints
+        ${incomePoints
           .map(
             point => `
               <circle
                 cx="${point.x}"
                 cy="${point.y}"
-                r="6"
+                r="7"
+                fill="#2ee58a"
+              />
+            `
+          )
+          .join("")}
+
+
+        ${expensePoints
+          .map(
+            point => `
+              <circle
+                cx="${point.x}"
+                cy="${point.y}"
+                r="7"
                 fill="#ff4f59"
               />
             `
+          )
+          .join("")}
+
+
+        ${points
+          .map(
+            (point, index) => {
+
+              const x =
+                points.length === 1
+                  ? width / 2
+                  : paddingX +
+                    (
+                      index /
+                      (
+                        points.length - 1
+                      )
+                    ) *
+                    usableWidth;
+
+              return `
+                <text
+                  x="${x}"
+                  y="${height - 10}"
+                  fill="#70787e"
+                  font-size="15"
+                  text-anchor="middle"
+                >
+                  ${dateFormatter.format(
+                    point.date
+                  )}
+                </text>
+              `;
+            }
           )
           .join("")}
 
@@ -2196,38 +1996,14 @@ if (chart) {
     `;
 
 
-    const firstValue =
-      ordered[0]?.value || 0;
-
-    const lastValue =
-      ordered[
-        ordered.length - 1
-      ]?.value || 0;
-
-
-    if (firstValue > 0) {
-
-      const change =
-        (
-          (
-            lastValue -
-            firstValue
-          ) /
-          firstValue
-        ) * 100;
-
-      setText(
-        "expensesChartChange",
-        `+${Math.round(change)}%`
-      );
-
-    } else {
-
-      setText(
-        "expensesChartChange",
-        "0%"
-      );
-    }
+    setText(
+      "expensesChartChange",
+      `${chartItems.length} ${
+        chartItems.length === 1
+          ? "registro"
+          : "registros"
+      }`
+    );
   }
 }
   
