@@ -2169,6 +2169,162 @@ header{
 
 }
 
+  /* ========================================
+   ANÁLISES
+======================================== */
+
+.analytics-page-backdrop{
+  position:fixed;
+  inset:0;
+
+  z-index:75;
+
+  background:#070a0d;
+
+  opacity:0;
+  pointer-events:none;
+
+  transition:opacity .2s ease;
+
+  overflow:auto;
+}
+
+.analytics-page-backdrop.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.analytics-page{
+  width:min(520px,100%);
+  min-height:100vh;
+
+  margin:auto;
+
+  padding:
+    calc(env(safe-area-inset-top) + 24px)
+    22px
+    calc(env(safe-area-inset-bottom) + 120px);
+}
+
+.analytics-page-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  margin-bottom:24px;
+}
+
+.analytics-page-header small{
+  display:block;
+
+  color:#858d93;
+
+  margin-bottom:4px;
+
+  font-weight:700;
+}
+
+.analytics-page-header h2{
+  margin:0;
+
+  font-size:29px;
+
+  letter-spacing:-.9px;
+}
+
+.analytics-close{
+  width:44px;
+  height:44px;
+
+  border:1px solid #293138;
+
+  border-radius:50%;
+
+  background:#151b20;
+
+  color:#fff;
+
+  font-size:24px;
+}
+
+.analytics-grid{
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:12px;
+
+  margin-bottom:14px;
+}
+
+.analytics-card,
+.analytics-balance-card,
+.analytics-highlight{
+  border:1px solid #293138;
+
+  border-radius:22px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #151b20,
+      #0e1215
+    );
+
+  padding:20px;
+}
+
+.analytics-card small,
+.analytics-balance-card small,
+.analytics-highlight small{
+  display:block;
+
+  color:#81898f;
+
+  font-size:12px;
+
+  font-weight:700;
+
+  margin-bottom:8px;
+}
+
+.analytics-card strong{
+  font-size:22px;
+}
+
+.analytics-balance-card{
+  margin-bottom:14px;
+}
+
+.analytics-balance-card strong{
+  display:block;
+
+  font-size:32px;
+
+  letter-spacing:-1px;
+}
+
+.analytics-highlight{
+  margin-bottom:14px;
+}
+
+.analytics-highlight strong{
+  display:block;
+
+  font-size:20px;
+
+  margin-bottom:5px;
+}
+
+.analytics-highlight span{
+  color:#8c949a;
+
+  font-size:14px;
+
+  font-weight:700;
+}
+  
 </style>
 </head>
 
@@ -2991,6 +3147,105 @@ Excluir movimentação
 
 </div>
 
+  <!-- ======================================
+     TELA DE ANÁLISES
+======================================= -->
+
+<div
+  class="analytics-page-backdrop"
+  id="analyticsPage"
+>
+
+  <div class="analytics-page">
+
+    <div class="analytics-page-header">
+
+      <div>
+        <small>My Finance</small>
+        <h2>Análises</h2>
+      </div>
+
+      <button
+        class="analytics-close"
+        id="closeAnalytics"
+        aria-label="Fechar"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="analytics-grid">
+
+      <div class="analytics-card">
+        <small>Entradas</small>
+        <strong
+          class="green"
+          id="analyticsIncome"
+        >
+          R$ 0,00
+        </strong>
+      </div>
+
+
+      <div class="analytics-card">
+        <small>Gastos</small>
+        <strong
+          class="red"
+          id="analyticsExpense"
+        >
+          R$ 0,00
+        </strong>
+      </div>
+
+    </div>
+
+
+    <div class="analytics-balance-card">
+
+      <small>Saldo do período</small>
+
+      <strong id="analyticsBalance">
+        R$ 0,00
+      </strong>
+
+    </div>
+
+
+    <div class="analytics-highlight">
+
+      <small>Maior gasto</small>
+
+      <strong id="analyticsLargestExpense">
+        —
+      </strong>
+
+      <span id="analyticsLargestExpenseValue">
+        R$ 0,00
+      </span>
+
+    </div>
+
+
+    <div class="analytics-highlight">
+
+      <small>Categoria com maior gasto</small>
+
+      <strong id="analyticsTopCategory">
+        —
+      </strong>
+
+      <span id="analyticsTopCategoryValue">
+        R$ 0,00
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
+  
 <script src="app.js?v=10"></script>
   
 </body>
