@@ -3107,6 +3107,90 @@ closeAnalytics
     "click",
     hideAnalyticsPage
   );
+/* =========================
+   ASSISTENTE IA
+========================= */
+
+const aiPage =
+  document.getElementById(
+    "aiPage"
+  );
+
+const navAI =
+  document.getElementById(
+    "navAI"
+  );
+
+const closeAI =
+  document.getElementById(
+    "closeAI"
+  );
+
+
+function showAIPage() {
+
+  if (!aiPage) {
+    return;
+  }
+
+  aiPage.classList.add(
+    "open"
+  );
+
+  document.body.classList.add(
+    "modal-open"
+  );
+
+  document
+    .querySelectorAll(
+      ".nav-item"
+    )
+    .forEach(item =>
+      item.classList.remove(
+        "active"
+      )
+    );
+
+  navAI?.classList.add(
+    "active"
+  );
+}
+
+
+function hideAIPage() {
+
+  aiPage?.classList.remove(
+    "open"
+  );
+
+  document.body.classList.remove(
+    "modal-open"
+  );
+
+  navAI?.classList.remove(
+    "active"
+  );
+
+  document
+    .getElementById(
+      "navHome"
+    )
+    ?.classList.add(
+      "active"
+    );
+}
+
+
+navAI?.addEventListener(
+  "click",
+  showAIPage
+);
+
+
+closeAI?.addEventListener(
+  "click",
+  hideAIPage
+);
 
 /* =========================
    HISTÓRICO / CALENDÁRIO
