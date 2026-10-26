@@ -2830,6 +2830,285 @@ closeAnalytics
   );
 
 /* =========================
+   ANÁLISES
+========================= */
+
+const analyticsPage =
+  document.getElementById(
+    "analyticsPage"
+  );
+
+const navAnalytics =
+  document.getElementById(
+    "navAnalytics"
+  );
+
+const closeAnalytics =
+  document.getElementById(
+    "closeAnalytics"
+  );
+
+
+function showAnalyticsPage() {
+
+  if (!analyticsPage) {
+    return;
+  }
+
+
+  const items =
+    transactions
+      .map(
+        normalizeTransaction
+      )
+      .filter(item =>
+        isInPeriod(
+          item.date,
+          currentPeriod
+        )
+      );
+
+
+  const incomeItems =
+    items.filter(
+      item =>
+        getType(item.type) ===
+        "income"
+    );
+
+
+  const expenseItems =
+    items.filter(
+      item =>
+        getType(item.type) ===
+        "expense"
+    );
+
+
+  const totalIncome =
+    incomeItems.reduce(
+      (total, item) =>
+        total + item.value,
+      0
+    );
+
+
+  const totalExpense =
+    expenseItems.reduce(
+      (total, item) =>
+        total + item.value,
+      0
+    );
+
+
+  const fixedTotal =
+    fixedExpenses.reduce(
+      (total, item) =>
+        total +
+        parseMoney(
+          item.Valor ??
+          item.valor ??
+          0
+        ),
+      0
+    );
+
+
+  const balance =
+    totalIncome -
+    totalExpense -
+    fixedTotal;
+
+
+  setText(
+    "analyticsIncome",
+    money.format(
+      totalIncome
+    )
+  );
+
+
+  setText(
+    "analyticsExpense",
+    money.format(
+      totalExpense
+    )
+  );
+
+
+  setText(
+    "analyticsBalance",
+    money.format(
+      balance
+    )
+  );
+
+
+  /* MAIOR GASTO */
+
+  if (
+    expenseItems.length
+  ) {
+
+    const largestExpense =
+      [...expenseItems]
+        .sort(
+          (a, b) =>
+            b.value - a.value
+        )[0];
+
+
+    setText(
+      "analyticsLargestExpense",
+      largestExpense.description
+    );
+
+
+    setText(
+      "analyticsLargestExpenseValue",
+      money.format(
+        largestExpense.value
+      )
+    );
+
+  } else {
+
+    setText(
+      "analyticsLargestExpense",
+      "—"
+    );
+
+    setText(
+      "analyticsLargestExpenseValue",
+      money.format(0)
+    );
+  }
+
+
+  /* CATEGORIA COM MAIOR GASTO */
+
+  const categoryTotals = {};
+
+
+  expenseItems.forEach(item => {
+
+    const category =
+      item.category ||
+      "Outros";
+
+
+    if (
+      !categoryTotals[
+        category
+      ]
+    ) {
+
+      categoryTotals[
+        category
+      ] = 0;
+    }
+
+
+    categoryTotals[
+      category
+    ] +=
+      item.value;
+  });
+
+
+  const categories =
+    Object.entries(
+      categoryTotals
+    );
+
+
+  if (
+    categories.length
+  ) {
+
+    categories.sort(
+      (a, b) =>
+        b[1] - a[1]
+    );
+
+
+    const [
+      topCategory,
+      topCategoryValue
+    ] =
+      categories[0];
+
+
+    setText(
+      "analyticsTopCategory",
+      topCategory
+    );
+
+
+    setText(
+      "analyticsTopCategoryValue",
+      money.format(
+        topCategoryValue
+      )
+    );
+
+  } else {
+
+    setText(
+      "analyticsTopCategory",
+      "—"
+    );
+
+
+    setText(
+      "analyticsTopCategoryValue",
+      money.format(0)
+    );
+  }
+
+
+  analyticsPage
+    .classList.add(
+      "open"
+    );
+
+
+  document.body
+    .classList.add(
+      "modal-open"
+    );
+}
+
+
+function hideAnalyticsPage() {
+
+  analyticsPage
+    ?.classList.remove(
+      "open"
+    );
+
+
+  document.body
+    .classList.remove(
+      "modal-open"
+    );
+}
+
+
+navAnalytics
+  ?.addEventListener(
+    "click",
+    showAnalyticsPage
+  );
+
+
+closeAnalytics
+  ?.addEventListener(
+    "click",
+    hideAnalyticsPage
+  );
+
+/* =========================
    HISTÓRICO / CALENDÁRIO
 ========================= */
 
