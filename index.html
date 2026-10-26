@@ -2324,6 +2324,303 @@ header{
 
   font-weight:700;
 }
+/* ========================================
+   ASSISTENTE IA
+======================================== */
+
+.ai-page-backdrop{
+  position:fixed;
+  inset:0;
+
+  z-index:75;
+
+  background:#070a0d;
+
+  opacity:0;
+  pointer-events:none;
+
+  transition:opacity .2s ease;
+
+  overflow:hidden;
+}
+
+.ai-page-backdrop.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.ai-page{
+  width:min(520px,100%);
+  height:100vh;
+
+  margin:auto;
+
+  display:flex;
+  flex-direction:column;
+
+  padding:
+    calc(env(safe-area-inset-top) + 24px)
+    18px
+    calc(env(safe-area-inset-bottom) + 105px);
+}
+
+
+/* HEADER */
+
+.ai-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  margin-bottom:18px;
+}
+
+.ai-header small{
+  display:block;
+
+  color:#858d93;
+
+  font-weight:700;
+
+  margin-bottom:4px;
+}
+
+.ai-header h2{
+  margin:0;
+
+  font-size:29px;
+
+  letter-spacing:-.9px;
+}
+
+.ai-close{
+  width:44px;
+  height:44px;
+
+  border:1px solid #293138;
+
+  border-radius:50%;
+
+  background:#151b20;
+
+  color:#fff;
+
+  font-size:24px;
+}
+
+
+/* MENSAGENS */
+
+.ai-messages{
+  flex:1;
+
+  overflow:auto;
+
+  padding:
+    8px 2px
+    20px;
+
+  display:flex;
+  flex-direction:column;
+
+  gap:15px;
+}
+
+.ai-message{
+  display:flex;
+  align-items:flex-end;
+
+  gap:9px;
+}
+
+.ai-message.user{
+  justify-content:flex-end;
+}
+
+.ai-avatar{
+  width:34px;
+  height:34px;
+
+  flex:0 0 34px;
+
+  display:grid;
+  place-items:center;
+
+  border-radius:12px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #2ee58a,
+      #168e55
+    );
+
+  color:#fff;
+
+  font-size:17px;
+
+  box-shadow:
+    0 6px 18px #2ee58a33;
+}
+
+.ai-bubble{
+  max-width:82%;
+
+  padding:
+    13px 15px;
+
+  border-radius:
+    18px 18px
+    18px 5px;
+
+  background:#151b20;
+
+  border:
+    1px solid #283037;
+
+  color:#f3f5f6;
+
+  font-size:15px;
+
+  line-height:1.45;
+}
+
+.ai-message.user
+.ai-bubble{
+  background:
+    linear-gradient(
+      145deg,
+      #263139,
+      #1b2329
+    );
+
+  border-color:#38444c;
+
+  border-radius:
+    18px 18px
+    5px 18px;
+}
+
+
+/* PERGUNTAS RÁPIDAS */
+
+.ai-suggestions{
+  display:flex;
+
+  gap:8px;
+
+  overflow:auto;
+
+  padding:
+    5px 0 12px;
+}
+
+.ai-suggestion{
+  flex:0 0 auto;
+
+  border:
+    1px solid #293238;
+
+  border-radius:999px;
+
+  padding:
+    9px 12px;
+
+  background:#11171b;
+
+  color:#a5adb3;
+
+  font-family:inherit;
+
+  font-size:12px;
+
+  font-weight:700;
+}
+
+
+/* CAMPO */
+
+.ai-input-area{
+  display:grid;
+
+  grid-template-columns:
+    1fr 48px;
+
+  gap:9px;
+
+  align-items:end;
+
+  padding:8px;
+
+  border:
+    1px solid #2d363c;
+
+  border-radius:22px;
+
+  background:#11171b;
+
+  box-shadow:
+    0 10px 35px #0008;
+}
+
+#aiInput{
+  width:100%;
+
+  max-height:120px;
+
+  resize:none;
+
+  border:0;
+  outline:0;
+
+  background:transparent;
+
+  color:#fff;
+
+  padding:
+    11px 9px;
+
+  font-family:inherit;
+
+  font-size:15px;
+}
+
+#aiInput::placeholder{
+  color:#6f787e;
+}
+
+#sendAI{
+  width:48px;
+  height:48px;
+
+  border:0;
+
+  border-radius:16px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #3ce993,
+      #22b96d
+    );
+
+  color:#fff;
+
+  font-size:24px;
+
+  font-weight:800;
+
+  display:grid;
+  place-items:center;
+
+  box-shadow:
+    0 6px 20px #2ee58a3d;
+}
+
+#sendAI:active,
+.ai-suggestion:active{
+  transform:scale(.96);
+}
   
 </style>
 </head>
@@ -2589,13 +2886,13 @@ Conectando ao Google Sheets…
   </button>
 
   <button
-    class="nav-item"
-    id="navTransactions"
-    aria-label="Movimentações"
-  >
-    <span class="nav-icon">☷</span>
-    <span>Movimentações</span>
-  </button>
+  class="nav-item"
+  id="navAI"
+  aria-label="Inteligência Artificial"
+>
+  <span class="nav-icon">✦</span>
+  <span>IA</span>
+</button>
 
   <button
     class="nav-add"
@@ -3239,6 +3536,102 @@ Excluir movimentação
       <span id="analyticsTopCategoryValue">
         R$ 0,00
       </span>
+
+    </div>
+
+  </div>
+
+</div>
+
+  <!-- ======================================
+     ASSISTENTE IA
+======================================= -->
+
+<div
+  class="ai-page-backdrop"
+  id="aiPage"
+>
+
+  <div class="ai-page">
+
+    <div class="ai-header">
+
+      <div>
+        <small>My Finance</small>
+        <h2>Assistente IA</h2>
+      </div>
+
+      <button
+        class="ai-close"
+        id="closeAI"
+        aria-label="Fechar"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div
+      class="ai-messages"
+      id="aiMessages"
+    >
+
+      <div class="ai-message assistant">
+
+        <div class="ai-avatar">
+          ✦
+        </div>
+
+        <div class="ai-bubble">
+          Olá! Posso analisar suas finanças e responder perguntas sobre seus gastos, entradas e saldo.
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="ai-suggestions">
+
+      <button
+        class="ai-suggestion"
+        data-ai-question="Onde estou gastando mais?"
+      >
+        Onde gasto mais?
+      </button>
+
+      <button
+        class="ai-suggestion"
+        data-ai-question="Como estão minhas finanças este mês?"
+      >
+        Resumo do mês
+      </button>
+
+      <button
+        class="ai-suggestion"
+        data-ai-question="Como posso economizar mais?"
+      >
+        Como economizar?
+      </button>
+
+    </div>
+
+
+    <div class="ai-input-area">
+
+      <textarea
+        id="aiInput"
+        rows="1"
+        placeholder="Pergunte sobre suas finanças..."
+      ></textarea>
+
+      <button
+        id="sendAI"
+        aria-label="Enviar"
+      >
+        ↑
+      </button>
 
     </div>
 
