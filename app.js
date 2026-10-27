@@ -3300,10 +3300,14 @@ async function askAI(
     loadingMessage.remove();
 
 
-    addAIMessage(
-      "Não consegui responder agora. Verifique a conexão com a OpenAI e tente novamente.",
-      "assistant"
-    );
+   addAIMessage(
+  "Erro: " +
+    (
+      error.message ||
+      "Não foi possível consultar a IA."
+    ),
+  "assistant"
+);
 
 
   } finally {
