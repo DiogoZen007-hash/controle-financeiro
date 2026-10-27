@@ -637,6 +637,10 @@ function showModal() {
     "modal-open"
   );
 
+  document.body.classList.add(
+  "transaction-open"
+);
+  
   setTimeout(() => {
 
     document
@@ -765,6 +769,21 @@ function openEditModal(row) {
 
 
 function closeModal() {
+
+  if (!modal) return;
+
+  modal.classList.remove(
+    "open"
+  );
+
+  document.body.classList.remove(
+    "modal-open"
+  );
+
+  document.body.classList.remove(
+    "transaction-open"
+  );
+}
 
   if (!modal) return;
 
@@ -2577,6 +2596,11 @@ function showAnalyticsPage() {
     return;
   }
 
+  aiPage
+  ?.classList.remove(
+    "open"
+  );
+
   /* Fecha IA */
 
 aiPage
@@ -2818,6 +2842,21 @@ document
     )
   );
 
+navAnalytics
+  ?.classList.add(
+    "active"
+  );
+
+document
+  .querySelectorAll(
+    ".nav-item"
+  )
+  .forEach(item =>
+    item.classList.remove(
+      "active"
+    )
+  );
+
 
 navAnalytics
   ?.classList.add(
@@ -2874,9 +2913,40 @@ const closeAI =
 
 function showAIPage() {
 
-  if (!aiPage) {
+ if (!aiPage) {
     return;
   }
+
+  analyticsPage
+    ?.classList.remove(
+      "open"
+    );
+
+  aiPage
+    .classList.add(
+      "open"
+    );
+
+  document.body
+    .classList.add(
+      "modal-open"
+    );
+
+  document
+    .querySelectorAll(
+      ".nav-item"
+    )
+    .forEach(item =>
+      item.classList.remove(
+        "active"
+      )
+    );
+
+  navAI
+    ?.classList.add(
+      "active"
+    );
+}
 
   /* Fecha Análises */
 
@@ -3460,6 +3530,56 @@ function showHomePage() {
       )
     );
 
+
+  navHome
+    ?.classList.add(
+      "active"
+    );
+}
+
+
+navHome
+  ?.addEventListener(
+    "click",
+    showHomePage
+  );
+
+/* =========================
+   NAVEGAÇÃO INFERIOR
+========================= */
+
+const navHome =
+  document.getElementById(
+    "navHome"
+  );
+
+
+function showHomePage() {
+
+  aiPage
+    ?.classList.remove(
+      "open"
+    );
+
+  analyticsPage
+    ?.classList.remove(
+      "open"
+    );
+
+  document.body
+    .classList.remove(
+      "modal-open"
+    );
+
+  document
+    .querySelectorAll(
+      ".nav-item"
+    )
+    .forEach(item =>
+      item.classList.remove(
+        "active"
+      )
+    );
 
   navHome
     ?.classList.add(
