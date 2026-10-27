@@ -2917,6 +2917,461 @@ closeAI?.addEventListener(
 );
 
 /* =========================
+   CHAT IA
+========================= */
+
+const aiInput =
+  document.getElementById(
+    "aiInput"
+  );
+
+const sendAI =
+  document.getElementById(
+    "sendAI"
+  );
+
+const aiMessages =
+  document.getElementById(
+    "aiMessages"
+  );
+
+
+function addAIMessage(
+  text,
+  type = "assistant"
+) {
+
+  if (!aiMessages) {
+    return;
+  }
+
+
+  const wrapper =
+    document.createElement(
+      "div"
+    );
+
+  wrapper.className =
+    `ai-message ${type}`;
+
+
+  if (
+    type === "assistant"
+  ) {
+
+    const avatar =
+      document.createElement(
+        "div"
+      );
+
+    avatar.className =
+      "ai-avatar";
+
+    avatar.textContent =
+      "✦";
+
+    wrapper.appendChild(
+      avatar
+    );
+  }
+
+
+  const bubble =
+    document.createElement(
+      "div"
+    );
+
+  bubble.className =
+    "ai-bubble";
+
+  bubble.textContent =
+    text;
+
+  wrapper.appendChild(
+    bubble
+  );
+
+
+  aiMessages.appendChild(
+    wrapper
+  );
+
+
+  aiMessages.scrollTop =
+    aiMessages.scrollHeight;
+}
+
+
+/* =========================
+   CONTEXTO FINANCEIRO
+========================= */
+
+function getAIFinancialContext() {
+
+  const items =
+    transactions
+      .map(
+        normalizeTransaction
+      )
+      .filter(item =>
+        isInPeriod(
+          item.date,
+          currentPeriod
+        )
+      );
+
+
+  const incomeItems =
+    items.filter(
+      item =>
+        getType(item.type) ===
+        "income"
+    );
+
+
+  const expenseItems =
+    items.filter(
+      item =>
+        getType(item.type) ===
+        "expense"
+    );
+
+
+  const totalIncome =
+    incomeItems.reduce(
+      (total, item) =>
+        total + item.value,
+      0
+    );
+
+
+  const totalExpense =
+    expenseItems.reduce(
+      (total, item) =>
+        total + item.value,
+      0
+    );
+
+
+  const fixedTotal =
+    fixedExpenses.reduce(
+      (total, item) =>
+        total +
+        parseMoney(
+          item.Valor ??
+          item.valor ??
+          0
+        ),
+      0
+    );
+
+
+  const categoryTotals = {};
+
+
+  expenseItems.forEach(item => {
+
+    const category =
+      item.category ||
+      "Outros";
+
+    categoryTotals[category] =
+      (
+        categoryTotals[
+          category
+        ] || 0
+      ) +
+      item.value;
+  });
+
+
+  return {
+
+    periodo:
+      selectedDay
+        ? selectedDay
+            .toLocaleDateString(
+              "pt-BR"
+            )
+        : currentPeriod ===
+            "month"
+          ? selectedDate
+              .toLocaleDateString(
+                "pt-BR",
+                {
+                  month: "long",
+                  year: "numeric"
+                }
+              )
+          : "Semana selecionada",
+
+    entradas:
+      totalIncome,
+
+    gastos:
+      totalExpense,
+
+    gastosFixos:
+      fixedTotal,
+
+    saldo:
+      totalIncome -
+      totalExpense -
+      fixedTotal,
+
+    categorias:
+      categoryTotals,
+
+    movimentacoes:
+      items.map(item => ({
+
+        data:
+          item.date
+            .toLocaleDateString(
+              "pt-BR"
+            ),
+
+        tipo:
+          item.type,
+
+        descricao:
+          item.description,
+
+        categoria:
+          item.category,
+
+        valor:
+          item.value
+      })),
+
+    despesasFixas:
+      fixedExpenses
+        .map(
+          normalizeFixedExpense
+        )
+        .map(item => ({
+
+          descricao:
+            item.description,
+
+          valor:
+            item.value
+        }))
+  };
+}
+
+
+/* =========================
+   ENVIAR PARA IA
+========================= */
+
+async function askAI(
+  question
+) {
+
+  const message =
+    String(
+      question || ""
+    ).trim();
+
+
+  if (!message) {
+    return;
+  }
+
+
+  addAIMessage(
+    message,
+    "user"
+  );
+
+
+  if (aiInput) {
+    aiInput.value = "";
+  }
+
+
+  const loadingMessage =
+    document.createElement(
+      "div"
+    );
+
+  loadingMessage.className =
+    "ai-message assistant";
+
+
+  loadingMessage.innerHTML = `
+    <div class="ai-avatar">
+      ✦
+    </div>
+
+    <div class="ai-bubble">
+      Pensando...
+    </div>
+  `;
+
+
+  aiMessages?.appendChild(
+    loadingMessage
+  );
+
+
+  if (aiMessages) {
+
+    aiMessages.scrollTop =
+      aiMessages.scrollHeight;
+  }
+
+
+  try {
+
+    if (sendAI) {
+      sendAI.disabled = true;
+    }
+
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type":
+              "text/plain;charset=utf-8"
+          },
+
+          body:
+            JSON.stringify({
+
+              action:
+                "ai_chat",
+
+              message:
+                message,
+
+              financialContext:
+                getAIFinancialContext()
+            })
+        }
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        "Erro ao acessar a IA."
+      );
+    }
+
+
+    const result =
+      await response.json();
+
+
+    if (!result.success) {
+
+      throw new Error(
+        result.error ||
+        "Erro ao consultar a IA."
+      );
+    }
+
+
+    loadingMessage.remove();
+
+
+    addAIMessage(
+      result.answer ||
+      "Não consegui responder.",
+      "assistant"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    loadingMessage.remove();
+
+
+    addAIMessage(
+      "Não consegui responder agora. Verifique a conexão com a OpenAI e tente novamente.",
+      "assistant"
+    );
+
+
+  } finally {
+
+    if (sendAI) {
+      sendAI.disabled =
+        false;
+    }
+  }
+}
+
+
+/* BOTÃO ENVIAR */
+
+sendAI?.addEventListener(
+  "click",
+  () => {
+
+    askAI(
+      aiInput?.value
+    );
+  }
+);
+
+
+/* ENTER PARA ENVIAR */
+
+aiInput?.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key ===
+        "Enter" &&
+      !event.shiftKey
+    ) {
+
+      event.preventDefault();
+
+      askAI(
+        aiInput.value
+      );
+    }
+  }
+);
+
+
+/* SUGESTÕES */
+
+document
+  .querySelectorAll(
+    ".ai-suggestion"
+  )
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        askAI(
+          button.dataset
+            .aiQuestion
+        );
+      }
+    );
+  });
+
+/* =========================
    HISTÓRICO / CALENDÁRIO
 ========================= */
 
