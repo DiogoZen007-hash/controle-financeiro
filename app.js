@@ -785,15 +785,6 @@ function closeModal() {
   );
 }
 
-  if (!modal) return;
-
-  modal.classList.remove("open");
-
-  document.body.classList.remove(
-    "modal-open"
-  );
-}
-
 
 openModalButton?.addEventListener(
   "click",
@@ -2596,17 +2587,8 @@ function showAnalyticsPage() {
     return;
   }
 
-  aiPage
-  ?.classList.remove(
-    "open"
-  );
-
   /* Fecha IA */
-
-aiPage
-  ?.classList.remove(
-    "open"
-  );
+  aiPage?.classList.remove("open");
 
   const items =
     transactions
@@ -2830,51 +2812,14 @@ aiPage
     .classList.add(
       "modal-open"
     );
+
+  document.querySelectorAll(".nav-item")
+    .forEach(item => item.classList.remove("active"));
+  navAnalytics?.classList.add("active");
 }
 
-document
-  .querySelectorAll(
-    ".nav-item"
-  )
-  .forEach(item =>
-    item.classList.remove(
-      "active"
-    )
-  );
-
-navAnalytics
-  ?.classList.add(
-    "active"
-  );
-
-document
-  .querySelectorAll(
-    ".nav-item"
-  )
-  .forEach(item =>
-    item.classList.remove(
-      "active"
-    )
-  );
-
-
-navAnalytics
-  ?.classList.add(
-    "active"
-  );
-
 function hideAnalyticsPage() {
-
-  analyticsPage
-    ?.classList.remove(
-      "open"
-    );
-
-
-  document.body
-    .classList.remove(
-      "modal-open"
-    );
+  showHomePage();
 }
 
 
@@ -2948,69 +2893,8 @@ function showAIPage() {
     );
 }
 
-  /* Fecha Análises */
-
-  analyticsPage
-    ?.classList.remove(
-      "open"
-    );
-
-
-  /* Abre IA */
-
-  aiPage
-    .classList.add(
-      "open"
-    );
-
-
-  document.body
-    .classList.add(
-      "modal-open"
-    );
-
-
-  /* Atualiza barra inferior */
-
-  document
-    .querySelectorAll(
-      ".nav-item"
-    )
-    .forEach(item =>
-      item.classList.remove(
-        "active"
-      )
-    );
-
-
-  navAI
-    ?.classList.add(
-      "active"
-    );
-}
-
-
 function hideAIPage() {
-
-  aiPage?.classList.remove(
-    "open"
-  );
-
-  document.body.classList.remove(
-    "modal-open"
-  );
-
-  navAI?.classList.remove(
-    "active"
-  );
-
-  document
-    .getElementById(
-      "navHome"
-    )
-    ?.classList.add(
-      "active"
-    );
+  showHomePage();
 }
 
 
@@ -3530,56 +3414,6 @@ function showHomePage() {
       )
     );
 
-
-  navHome
-    ?.classList.add(
-      "active"
-    );
-}
-
-
-navHome
-  ?.addEventListener(
-    "click",
-    showHomePage
-  );
-
-/* =========================
-   NAVEGAÇÃO INFERIOR
-========================= */
-
-const navHome =
-  document.getElementById(
-    "navHome"
-  );
-
-
-function showHomePage() {
-
-  aiPage
-    ?.classList.remove(
-      "open"
-    );
-
-  analyticsPage
-    ?.classList.remove(
-      "open"
-    );
-
-  document.body
-    .classList.remove(
-      "modal-open"
-    );
-
-  document
-    .querySelectorAll(
-      ".nav-item"
-    )
-    .forEach(item =>
-      item.classList.remove(
-        "active"
-      )
-    );
 
   navHome
     ?.classList.add(
