@@ -2577,6 +2577,12 @@ function showAnalyticsPage() {
     return;
   }
 
+  /* Fecha IA */
+
+aiPage
+  ?.classList.remove(
+    "open"
+  );
 
   const items =
     transactions
@@ -2802,6 +2808,21 @@ function showAnalyticsPage() {
     );
 }
 
+document
+  .querySelectorAll(
+    ".nav-item"
+  )
+  .forEach(item =>
+    item.classList.remove(
+      "active"
+    )
+  );
+
+
+navAnalytics
+  ?.classList.add(
+    "active"
+  );
 
 function hideAnalyticsPage() {
 
@@ -2857,13 +2878,29 @@ function showAIPage() {
     return;
   }
 
-  aiPage.classList.add(
-    "open"
-  );
+  /* Fecha Análises */
 
-  document.body.classList.add(
-    "modal-open"
-  );
+  analyticsPage
+    ?.classList.remove(
+      "open"
+    );
+
+
+  /* Abre IA */
+
+  aiPage
+    .classList.add(
+      "open"
+    );
+
+
+  document.body
+    .classList.add(
+      "modal-open"
+    );
+
+
+  /* Atualiza barra inferior */
 
   document
     .querySelectorAll(
@@ -2875,9 +2912,11 @@ function showAIPage() {
       )
     );
 
-  navAI?.classList.add(
-    "active"
-  );
+
+  navAI
+    ?.classList.add(
+      "active"
+    );
 }
 
 
@@ -3374,6 +3413,66 @@ document
       }
     );
   });
+
+/* =========================
+   NAVEGAÇÃO INFERIOR
+========================= */
+
+const navHome =
+  document.getElementById(
+    "navHome"
+  );
+
+
+function showHomePage() {
+
+  /* Fecha IA */
+
+  aiPage
+    ?.classList.remove(
+      "open"
+    );
+
+
+  /* Fecha Análises */
+
+  analyticsPage
+    ?.classList.remove(
+      "open"
+    );
+
+
+  document.body
+    .classList.remove(
+      "modal-open"
+    );
+
+
+  /* Atualiza botão ativo */
+
+  document
+    .querySelectorAll(
+      ".nav-item"
+    )
+    .forEach(item =>
+      item.classList.remove(
+        "active"
+      )
+    );
+
+
+  navHome
+    ?.classList.add(
+      "active"
+    );
+}
+
+
+navHome
+  ?.addEventListener(
+    "click",
+    showHomePage
+  );
 
 /* =========================
    HISTÓRICO / CALENDÁRIO
